@@ -1,0 +1,13 @@
+/tmp
+/*.cache
+/config.yaml
+/Gemfile.lock
+/vendor/bin
+/vendor/build_info
+/vendor/cache
+/vendor/gems
+/vendor/specifications
+/.bundle
+.ruby-version
+pkg
+log
