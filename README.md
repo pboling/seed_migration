@@ -1,3 +1,5 @@
+# WARNING : This is not stable yet!
+
 # SeedMigration
 
 Data Migrations are similar to regular rails schema migrations
