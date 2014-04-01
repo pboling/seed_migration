@@ -1,2 +1,2 @@
-DataMigration::Engine.routes.draw do
+SeedMigration::Engine.routes.draw do
 end

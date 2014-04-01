@@ -1,4 +1,4 @@
 Rails.application.routes.draw do
 
-  mount DataMigration::Engine => "/data_migration"
+  mount SeedMigration::Engine => "/seed_migration"
 end
