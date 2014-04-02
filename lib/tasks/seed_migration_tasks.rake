@@ -22,10 +22,4 @@ namespace :data do
             SeedMigration::Migrator.new(path).down
         end
     end
-
-    desc "Import old data migrations"
-    task :bootstrap => :environment do
-        path = SeedMigration::Migrator.migration_path("20140313133343_insert_prior_data_migrations.rb")
-        SeedMigration::Migrator.new(path).up
-    end
 end
