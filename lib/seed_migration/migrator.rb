@@ -69,22 +69,7 @@ module SeedMigration
         migration = migration_path(migration)
         new(migration).up
       end
-      # Create seeds.rb file
-      File.open(SEEDS_FILE_PATH, 'w') do |file|
-        SeedMigration.registrar.each do |register_entry|
-          register_entry.model.all.each do |instance|
-            file.write generate_model_creation_string(instance, register_entry)
-          end
-        end
-      end
-    end
-
-    def self.generate_model_creation_string(instance, register_entry)
-      attributes = instance.attributes.select {|key| register_entry.attributes.include?(key) }
-      return <<-eos
-#{instance.class}.create(#{attributes.to_s})
-
-      eos
+      create_seed_file
     end
 
     def self.rollback_migrations(steps = 1)
@@ -177,6 +162,46 @@ module SeedMigration
 
       # Just in case
       files.sort!
+    end
+
+    def self.create_seed_file
+      File.open(SEEDS_FILE_PATH, 'w') do |file|
+        file.write <<-eos
+# encoding: UTF-8
+# This file is auto-generated from the current content of the database. Instead
+# of editing this file, please use the migrations feature of Seed Migration to
+# incrementally modify your database, and then regenerate this seed file.
+#
+# If you need to create see the database on another system, you should be using
+# db:seed, not running all the migrations from scratch. The latter is a flawed
+# and unsustainable approach (the more migrations you'll amass, the slower
+# it'll run and the greater likelihood for issues).
+#
+# It's strongly recommended to check this file into your version control system.
+
+ActiveRecord::Base.transaction do
+        eos
+        SeedMigration.registrar.each do |register_entry|
+          register_entry.model.all.each do |instance|
+            file.write generate_model_creation_string(instance, register_entry)
+          end
+
+          file.write <<-eos
+  ActiveRecord::Base.connection.reset_pk_sequence!('#{register_entry.model.table_name}')
+          eos
+        end
+        file.write <<-eos
+end
+        eos
+      end
+    end
+
+    def self.generate_model_creation_string(instance, register_entry)
+      attributes = instance.attributes.select {|key| register_entry.attributes.include?(key) }
+      return <<-eos
+
+  #{instance.class}.create(#{JSON.parse(attributes.to_json).to_s}, :without_protection => true)
+      eos
     end
   end
 end
