@@ -91,4 +91,61 @@ describe SeedMigration::Migrator do
       end
     end
   end
+
+  describe 'seeds.rb generation' do
+    before(:all) do
+      2.times { |i| User.create :username => i }
+      2.times { |i| Product.create }
+      2.times { |i| UselessModel.create }
+    end
+
+    after(:all) do
+      User.delete_all
+      Product.delete_all
+      UselessModel.delete_all
+    end
+
+    before(:each) { SeedMigration::Migrator.run_new_migrations }
+    let(:contents) { File.read(SeedMigration::Migrator::SEEDS_FILE_PATH) }
+
+    context 'models' do
+      before(:all) do
+        SeedMigration.register User
+        SeedMigration.register Product
+      end
+
+      it 'creates seeds.rb file' do
+        File.exists?(File.join(Rails.root, 'db', 'seeds.rb')).should be_true
+      end
+
+      it 'outputs models creation in seeds.rb file' do
+        contents.should_not be_nil
+        contents.should_not be_empty
+        contents.should include("User.create")
+        contents.should include("Product.create")
+      end
+
+      it 'only outputs registered models' do
+        contents.should_not include("SeedMigration::DataMigration.create")
+        contents.should_not include("UselessModel.create")
+      end
+
+      it 'should output all attributes' do
+        contents.should match(/(?=.*User\.create)(?=.*"id"=>)(?=.*"username"=>).*/)
+        contents.should match(/(?=.*Product\.create)(?=.*"id"=>)(?=.*"created_at"=>)(?=.*"updated_at"=>).*/)
+      end
+    end
+
+    context 'attributes' do
+      before(:all) do
+        SeedMigration.register User do
+          exclude :id
+        end
+      end
+      it 'only outputs selected attributes' do
+        contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
+      end
+    end
+  end
+
 end

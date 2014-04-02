@@ -3,6 +3,7 @@ require 'pathname'
 module SeedMigration
   class Migrator
     DATA_MIGRATION_DIRECTORY = Rails.root.join("db", "data")
+    SEEDS_FILE_PATH = Rails.root.join('db', 'seeds.rb')
 
     def self.migration_path(filename)
       DATA_MIGRATION_DIRECTORY.join(filename).to_s
@@ -62,11 +63,28 @@ module SeedMigration
 
     # Rake methods
     def self.run_new_migrations
+      # TODO : Add warning about empty registered_models
       migrations = get_new_migrations
       migrations.each do |migration|
         migration = migration_path(migration)
         new(migration).up
       end
+      # Create seeds.rb file
+      File.open(SEEDS_FILE_PATH, 'w') do |file|
+        SeedMigration.registrar.each do |register_entry|
+          register_entry.model.all.each do |instance|
+            file.write generate_model_creation_string(instance, register_entry)
+          end
+        end
+      end
+    end
+
+    def self.generate_model_creation_string(instance, register_entry)
+      attributes = instance.attributes.select {|key| register_entry.attributes.include?(key) }
+      return <<-eos
+#{instance.class}.create(#{attributes.to_s})
+
+      eos
     end
 
     def self.rollback_migrations(steps = 1)
