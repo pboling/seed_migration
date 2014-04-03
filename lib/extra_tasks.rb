@@ -1,5 +1,10 @@
 # This task is manually loaded after the engine has been initialized
 require 'rake'
+begin
+  Rake::Task['db:migrate']
+rescue RuntimeError
+  Rails.application.load_tasks
+end
 
 DATA_MIGRATE_TASK_NAME = 'data:migrate'
 
