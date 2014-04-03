@@ -192,6 +192,8 @@ ActiveRecord::Base.transaction do
         end
         file.write <<-eos
 end
+
+SeedMigration::Migrator.bootstrap
         eos
       end
     end
