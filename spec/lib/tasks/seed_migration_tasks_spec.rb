@@ -1,13 +1,14 @@
 require 'spec_helper'
-load 'Rakefile'
+require 'rake'
+load Rails.root.join('Rakefile')
 
 describe 'Rake Tasks' do
   it 'should define rake data:migrate' do
-    Rake::Task['app:data:migrate'].should_not be_nil
+    Rake::Task['data:migrate'].should_not be_nil
   end
 
   it 'should define rake data:rollback' do
-    Rake::Task['app:data:rollback'].should_not be_nil
+    Rake::Task['data:rollback'].should_not be_nil
   end
 
   context 'extending rake db:migrate' do
@@ -21,7 +22,7 @@ describe 'Rake Tasks' do
 
       it 'should not extend rake db:migrate' do
         SeedMigration.extend_native_migration.should be_false
-        Rake::Task['app:data:migrate'].should_not_receive(:invoke)
+        Rake::Task['data:migrate'].should_not_receive(:invoke)
         Rake::Task["db:migrate"].execute
       end
     end
@@ -30,7 +31,7 @@ describe 'Rake Tasks' do
 
       it 'should extend rake db:migrate' do
         SeedMigration.extend_native_migration.should be_true
-        Rake::Task['app:data:migrate'].should_receive(:invoke)
+        Rake::Task['data:migrate'].should_receive(:invoke)
         Rake::Task["db:migrate"].execute
       end
     end
