@@ -72,12 +72,7 @@ module SeedMigration
     end
 
     def self.last_migration
-      migrations = get_new_migrations
-      if migrations.present?
-        last_migration = migrations.last
-      else
-        last_migration = get_migration_files.last
-      end
+      return SeedMigration::DataMigration.maximum("version")
     end
 
     def self.rollback_migrations(steps = 1)
@@ -85,6 +80,7 @@ module SeedMigration
       to_run.each do |migration|
         new(migration).down
       end
+      create_seed_file
     end
 
     def self.bootstrap(last_timestamp = nil)
@@ -120,11 +116,10 @@ module SeedMigration
 
     def self.get_new_migrations
       migrations = []
-      last_migration = get_last_migration_date
       files = get_migration_files
 
       # If there is no last migration, all migrations are new
-      if last_migration.nil?
+      if get_last_migration_date.nil?
         return files
       end
 
@@ -164,7 +159,7 @@ module SeedMigration
 
     def self.get_last_migration_date
       return nil if SeedMigration::DataMigration.count == 0
-      DateTime.parse(SeedMigration::DataMigration.maximum("version"))
+      DateTime.parse(last_migration)
     end
 
     def self.get_migration_files(last_timestamp = nil)
@@ -181,7 +176,6 @@ module SeedMigration
     end
 
     def self.create_seed_file
-      last_timestamp = File.basename(last_migration).split('_').first
       File.open(SEEDS_FILE_PATH, 'w') do |file|
         file.write <<-eos
 # encoding: UTF-8
@@ -210,7 +204,7 @@ ActiveRecord::Base.transaction do
         file.write <<-eos
 end
 
-SeedMigration::Migrator.bootstrap(#{last_timestamp})
+SeedMigration::Migrator.bootstrap(#{last_migration})
         eos
       end
     end
