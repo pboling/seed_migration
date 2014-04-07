@@ -199,7 +199,7 @@ module SeedMigration
 ActiveRecord::Base.transaction do
         eos
         SeedMigration.registrar.each do |register_entry|
-          register_entry.model.all.each do |instance|
+          register_entry.model.order('id').each do |instance|
             file.write generate_model_creation_string(instance, register_entry)
           end
 
