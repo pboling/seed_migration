@@ -21,6 +21,15 @@ Note : It'll soon be released on rubygems.org.
 
 ## Usage
 
+### Install and run the internal migrations
+
+```ruby
+rake seed_migration:install:migrations
+rake db:migrate
+```
+
+That will create the table to keep track of data migrations.
+
 ### Generate a new migration
 
 `SeedMigration` adds a new rails generator :
