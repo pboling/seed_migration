@@ -4,8 +4,6 @@ require 'rails/generators/named_base'
 module SeedMigration
   module Generators
     class MigrationGenerator < Rails::Generators::NamedBase
-      # source_root File.expand_path("../../templates", __FILE__)
-      # namespace "seed_migration"
 
       desc "Creates a data migration"
       class_option :migration_name, :type => :string, :default => nil
