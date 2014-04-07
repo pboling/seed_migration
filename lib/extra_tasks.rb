@@ -12,7 +12,7 @@ rescue RuntimeError
 end
 
 
-if SeedMigration.extend_native_migration
+if SeedMigration.extend_native_migration_task
   Rake::Task['db:migrate'].enhance do
     Rake::Task['data:migrate'].invoke
   end

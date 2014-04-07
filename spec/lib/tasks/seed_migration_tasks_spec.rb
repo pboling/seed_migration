@@ -14,23 +14,23 @@ describe 'Rake Tasks' do
   context 'extending rake db:migrate' do
     before(:each) do
       Rake::Task["db:migrate"].clear
-      SeedMigration.extend_native_migration = extend_native_migration
+      SeedMigration.extend_native_migration_task = extend_native_migration_task
       load 'lib/extra_tasks.rb'
     end
     context 'option disabled' do
-      let(:extend_native_migration) { false }
+      let(:extend_native_migration_task) { false }
 
       it 'should not extend rake db:migrate' do
-        SeedMigration.extend_native_migration.should be_false
+        SeedMigration.extend_native_migration_task.should be_false
         Rake::Task['data:migrate'].should_not_receive(:invoke)
         Rake::Task["db:migrate"].execute
       end
     end
     context 'option enabled' do
-      let(:extend_native_migration) { true }
+      let(:extend_native_migration_task) { true }
 
       it 'should extend rake db:migrate' do
-        SeedMigration.extend_native_migration.should be_true
+        SeedMigration.extend_native_migration_task.should be_true
         Rake::Task['data:migrate'].should_receive(:invoke)
         Rake::Task["db:migrate"].execute
       end
