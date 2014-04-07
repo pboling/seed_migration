@@ -79,6 +79,51 @@ Or rollback a specific migration:
 rake data:rollback MIGRATION=20140407162007_add_foo.rb
 ```
 
+### Registering models
+
+By default, `SeedMigration` won't seen any data after running `data:migrate`. You have to manually register the models in the configuration file.
+
+Simply register a model:
+
+```ruby
+SeedMigration.register Product
+```
+
+You can customize the 'seeded' attribute list:
+
+```ruby
+SeedMigration.register User do
+  exclude :id, :password
+end
+```
+
+This will create a `seeds.rb` containing all User and Product in the database:
+
+```ruby
+# encoding: UTF-8
+# This file is auto-generated from the current content of the database. Instead
+# of editing this file, please use the migrations feature of Seed Migration to
+# incrementally modify your database, and then regenerate this seed file.
+#
+# If you need to create see the database on another system, you should be using
+# db:seed, not running all the migrations from scratch. The latter is a flawed
+# and unsustainable approach (the more migrations you'll amass, the slower
+# it'll run and the greater likelihood for issues).
+#
+# It's strongly recommended to check this file into your version control system.
+
+ActiveRecord::Base.transaction do
+  Product.create("id"=>1, "name"=>"foo", "created_at"=>"2014-04-04T15:42:24Z", "updated_at"=>"2014-04-04T15:42:24Z")
+  Product.create("id"=>2, "name"=>"bar", "created_at"=>"2014-04-04T15:42:24Z", "updated_at"=>"2014-04-04T15:42:24Z")
+  # ...
+  User.create("id"=>1, "name"=>"admin", "created_at"=>"2014-04-04T15:42:24Z", "updated_at"=>"2014-04-04T15:42:24Z")
+  # ...
+end
+
+SeedMigration::Migrator.bootstrap(20140404193326)
+```
+
+
 ### Deployment notes
 
 It is recommended to add the `rake data:migrate` to your deploy script, so each new data migrations is ran upon new deploys.
@@ -128,11 +173,16 @@ SeedMigration.config do |c|
     c.extend_native_migration_task = true
     c.pending_migrations_warning_level = :error
 end
+
+SeedMigration.register User do
+  exclude :id, :password
+end
+SeedMigration.register Product
 ```
 
 ## Compatibility
 
-At the moment, we rely by default on 
+At the moment, we rely by default on
 
 ```
 ActiveRecord::Base.connection.reset_pk_sequence!
