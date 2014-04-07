@@ -4,14 +4,15 @@ describe SeedMigration::Migrator do
   before :each do
     # Generate test migrations
     2.times do |i|
-      Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{i}"])
-      sleep 1 # For file uniqueness
+      timestamp = Time.now.utc + i
+      Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{i}", timestamp.strftime('%Y%m%d%H%M%S')])
     end
   end
 
   after :each do
     # Delete fixtures from folder
     FileUtils.rm(SeedMigration::Migrator.get_migration_files)
+    SeedMigration::DataMigration.delete_all
   end
 
   let(:test_migration_path) {
@@ -49,14 +50,7 @@ describe SeedMigration::Migrator do
   describe '.get_new_migrations' do
     before(:each) do
       SeedMigration::Migrator.run_new_migrations
-      Rails::Generators.invoke("seed_migration:migration", ["TestMigrationBefore"])
-      # rename to file as it was generated before others
-      File.open(SeedMigration::Migrator.get_migration_files.last) do |file|
-        splitted_timestamped_name = File.basename(file).split('_')
-        splitted_timestamped_name[0] = 5.days.ago.utc.strftime("%Y%m%d%H%M%S")
-        new_file_name = splitted_timestamped_name.join('_')
-        File.rename(file, File.dirname(file) + "/" + new_file_name)
-      end
+      Rails::Generators.invoke("seed_migration:migration", ["TestMigrationBefore", 5.days.ago.utc.strftime("%Y%m%d%H%M%S")])
     end
 
     it 'runs all non ran migrations' do
@@ -146,6 +140,72 @@ describe SeedMigration::Migrator do
         contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
       end
     end
+
+    context 'bootstrap' do
+      it 'should contain the bootstrap call' do
+        contents.should match("SeedMigration::Migrator.bootstrap")
+      end
+
+      it 'should contain the last migrations timestamp' do
+        last_timestamp = SeedMigration::Migrator.get_migration_files.map { |pathname| File.basename(pathname).split('_').first }.last
+        contents.should include("SeedMigration::Migrator.bootstrap(#{last_timestamp})")
+      end
+    end
   end
 
+  describe '.get_migration_files' do
+    context 'without params' do
+      it 'return all migrations' do
+        SeedMigration::Migrator.get_migration_files.length.should eq(2)
+      end
+    end
+
+    context 'with params' do
+      let(:timestamp1) { 1.minutes.from_now.strftime('%Y%m%d%H%M%S') }
+      let(:timestamp2) { 2.minutes.from_now.strftime('%Y%m%d%H%M%S') }
+      it 'returns migration up to the given timestamp' do
+        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp1}", timestamp1])
+        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp2}", timestamp2])
+
+        SeedMigration::Migrator.get_migration_files(timestamp1).length.should eq(3)
+      end
+    end
+  end
+
+  describe '.bootstrap' do
+    context 'without params' do
+      it 'marks all migrations as ran' do
+        SeedMigration::Migrator.bootstrap
+        SeedMigration::DataMigration.all.length.should eq(2)
+      end
+    end
+
+    context 'with timestamp param' do
+      let(:timestamp1) { 1.minutes.from_now.strftime('%Y%m%d%H%M%S') }
+      let(:timestamp2) { 2.minutes.from_now.strftime('%Y%m%d%H%M%S') }
+
+      it 'marks migrations prior to timestamp'do
+        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp1}", timestamp1])
+        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp2}", timestamp2])
+
+        SeedMigration::Migrator.bootstrap(timestamp1)
+        SeedMigration::DataMigration.all.length.should eq(3)
+      end
+    end
+  end
+
+  describe '.run_new_migrations' do
+    context 'with pending migrations' do
+      it 'runs migrations' do
+        expect{ SeedMigration::Migrator.run_new_migrations }.to_not raise_error
+      end
+    end
+
+    context 'without pending migrations' do
+      before(:each) { SeedMigration::Migrator.run_new_migrations }
+      it 'runs migrations' do
+        expect{ SeedMigration::Migrator.run_new_migrations }.to_not raise_error
+      end
+    end
+  end
 end

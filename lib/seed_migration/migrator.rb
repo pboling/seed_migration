@@ -64,12 +64,20 @@ module SeedMigration
     # Rake methods
     def self.run_new_migrations
       # TODO : Add warning about empty registered_models
-      migrations = get_new_migrations
-      migrations.each do |migration|
+      get_new_migrations.each do |migration|
         migration = migration_path(migration)
         new(migration).up
       end
       create_seed_file
+    end
+
+    def self.last_migration
+      migrations = get_new_migrations
+      if migrations.present?
+        last_migration = migrations.last
+      else
+        last_migration = get_migration_files.last
+      end
     end
 
     def self.rollback_migrations(steps = 1)
@@ -79,8 +87,10 @@ module SeedMigration
       end
     end
 
-    def self.bootstrap
-      files = SeedMigration::Migrator.get_migration_files
+    def self.bootstrap(last_timestamp = nil)
+      # replace with logger ?
+      p "Assume migrated up to #{last_timestamp}"
+      files = SeedMigration::Migrator.get_migration_files(last_timestamp.to_s)
       files.each do |file|
         name = file.split('/').last
         version = name.split('_').first
@@ -157,14 +167,21 @@ module SeedMigration
       DateTime.parse(SeedMigration::DataMigration.maximum("version"))
     end
 
-    def self.get_migration_files
+    def self.get_migration_files(last_timestamp = nil)
       files = Dir.glob(SeedMigration::Migrator.migration_path("*_*.rb"))
+      if last_timestamp.present?
+        files.delete_if do |file|
+          timestamp = File.basename(file).split('_').first
+          timestamp > last_timestamp
+        end
+      end
 
       # Just in case
       files.sort!
     end
 
     def self.create_seed_file
+      last_timestamp = File.basename(last_migration).split('_').first
       File.open(SEEDS_FILE_PATH, 'w') do |file|
         file.write <<-eos
 # encoding: UTF-8
@@ -193,7 +210,7 @@ ActiveRecord::Base.transaction do
         file.write <<-eos
 end
 
-SeedMigration::Migrator.bootstrap
+SeedMigration::Migrator.bootstrap(#{last_timestamp})
         eos
       end
     end
