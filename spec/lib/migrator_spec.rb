@@ -139,6 +139,21 @@ describe SeedMigration::Migrator do
       it 'only outputs selected attributes' do
         contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
       end
+
+      context 'ignore_ids option' do
+        before(:all) do
+          SeedMigration.ignore_ids = true
+          SeedMigration.register User
+        end
+
+        it "doesn't output ids" do
+          contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
+        end
+
+        it "doesn't reset the pk sequence" do
+          contents.should_not include('ActiveRecord::Base.connection.reset_pk_sequence')
+        end
+      end
     end
 
     context 'bootstrap' do

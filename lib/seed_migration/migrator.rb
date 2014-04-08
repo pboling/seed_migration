@@ -197,9 +197,11 @@ ActiveRecord::Base.transaction do
             file.write generate_model_creation_string(instance, register_entry)
           end
 
-          file.write <<-eos
+          if !SeedMigration.ignore_ids
+            file.write <<-eos
   ActiveRecord::Base.connection.reset_pk_sequence!('#{register_entry.model.table_name}')
-          eos
+            eos
+          end
         end
         file.write <<-eos
 end
@@ -211,6 +213,9 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
 
     def self.generate_model_creation_string(instance, register_entry)
       attributes = instance.attributes.select {|key| register_entry.attributes.include?(key) }
+      if SeedMigration.ignore_ids
+        attributes.delete('id')
+      end
       return <<-eos
 
   #{instance.class}.create(#{JSON.parse(attributes.to_json).to_s}, :without_protection => true)
