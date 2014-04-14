@@ -104,6 +104,7 @@ describe SeedMigration::Migrator do
 
     context 'models' do
       before(:all) do
+        SeedMigration.ignore_ids = false
         SeedMigration.register User
         SeedMigration.register Product
       end
