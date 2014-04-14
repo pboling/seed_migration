@@ -129,6 +129,10 @@ describe SeedMigration::Migrator do
         contents.should match(/(?=.*User\.create)(?=.*"id"=>)(?=.*"username"=>).*/)
         contents.should match(/(?=.*Product\.create)(?=.*"id"=>)(?=.*"created_at"=>)(?=.*"updated_at"=>).*/)
       end
+
+      it 'should output attributes alphabetically ordered' do
+        contents.should match(/(?=.*User\.create)(?=.*"a"=>.*"id"=>.*"username"=>).*/)
+      end
     end
 
     context 'attributes' do

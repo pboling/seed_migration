@@ -216,9 +216,13 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       if SeedMigration.ignore_ids
         attributes.delete('id')
       end
+      sorted_attributes = {}
+      attributes.sort.each do |key, value|
+        sorted_attributes[key] = value
+      end
       return <<-eos
 
-  #{instance.class}.create(#{JSON.parse(attributes.to_json).to_s}, :without_protection => true)
+  #{instance.class}.create(#{JSON.parse(sorted_attributes.to_json).to_s}, :without_protection => true)
       eos
     end
   end
