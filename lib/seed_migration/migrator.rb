@@ -176,6 +176,9 @@ module SeedMigration
     end
 
     def self.create_seed_file
+      if !Rails.env.development?
+        return
+      end
       File.open(SEEDS_FILE_PATH, 'w') do |file|
         file.write <<-eos
 # encoding: UTF-8

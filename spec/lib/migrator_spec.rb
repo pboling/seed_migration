@@ -7,6 +7,8 @@ describe SeedMigration::Migrator do
       timestamp = Time.now.utc + i
       Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{i}", timestamp.strftime('%Y%m%d%H%M%S')])
     end
+
+    Rails.stub(env: ActiveSupport::StringInquirer.new("development"))
   end
 
   after :each do
@@ -169,6 +171,17 @@ describe SeedMigration::Migrator do
       it 'should contain the last migrations timestamp' do
         last_timestamp = SeedMigration::Migrator.get_migration_files.map { |pathname| File.basename(pathname).split('_').first }.last
         contents.should include("SeedMigration::Migrator.bootstrap(#{last_timestamp})")
+      end
+    end
+
+    context 'non development environment' do
+      before(:each) do
+        Rails.stub(env: ActiveSupport::StringInquirer.new("production"))
+        FileUtils.rm(SeedMigration::Migrator::SEEDS_FILE_PATH)
+        SeedMigration::Migrator.run_new_migrations
+      end
+      it "doesn't generate seed file" do
+        File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should be_false
       end
     end
   end
