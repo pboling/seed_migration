@@ -6,7 +6,7 @@ module SeedMigration
     class SeedMigrationGenerator < Rails::Generators::NamedBase
 
       namespace "seed_migration"
-      desc "Creates a data migration"
+      desc "Creates a seed migration"
       class_option :migration_name, :type => :string, :default => nil
       argument :timestamp, :type => :string, :required => false, :default => Time.now.utc.strftime("%Y%m%d%H%M%S")
 
