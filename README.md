@@ -1,4 +1,4 @@
-TODO : Add travis configuration, and then badge, eventually gemfury badge too.
+[![Build Status](https://travis-ci.org/harrystech/seed_migration.svg?branch=master)](https://travis-ci.org/harrystech/seed_migration)
 
 # SeedMigration
 
