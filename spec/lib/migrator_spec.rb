@@ -90,7 +90,7 @@ describe SeedMigration::Migrator do
 
   describe 'seeds.rb generation' do
     before(:all) do
-      2.times { |i| User.create :username => i }
+      2.times { |i| u = User.new; u.username = i; u.save }
       2.times { |i| Product.create }
       2.times { |i| UselessModel.create }
     end
