@@ -14,6 +14,6 @@ end
 
 if SeedMigration.extend_native_migration_task
   Rake::Task['db:migrate'].enhance do
-    Rake::Task['data:migrate'].invoke
+    Rake::Task['seed:migrate'].invoke
   end
 end

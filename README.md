@@ -35,7 +35,7 @@ That will create the table to keep track of data migrations.
 `SeedMigration` adds a new rails generator :
 
 ```ruby
-rails g seed_migration:migration AddFoo
+rails g seed_migration AddFoo
 ```
 A new file will be created under `db/data/` using rails migration convention:
 
@@ -50,13 +50,13 @@ You'll need to implement the `#up` method and if you need to be able to rollback
 To run all pending migrations, simply use
 
 ```ruby
-rake data:migrate
+rake seed:migrate
 ```
 
 If needed, you can run a specific migration:
 
 ```ruby
-rake data:migrate MIGRATION=20140407162007_add_foo.rb
+rake seed:migrate MIGRATION=20140407162007_add_foo.rb
 ```
 
 ### Rollback
@@ -64,24 +64,24 @@ rake data:migrate MIGRATION=20140407162007_add_foo.rb
 Rolling back the last migration is as simple as:
 
 ```ruby
-rake data:rollback
+rake seed:rollback
 ```
 
 You can rollback more than one migration at the same time:
 
 ```ruby
-rake data:rollback STEPS=3 # rollback last 3 migrations
+rake seed:rollback STEPS=3 # rollback last 3 migrations
 ```
 
 Or rollback a specific migration:
 
 ```ruby
-rake data:rollback MIGRATION=20140407162007_add_foo.rb
+rake seed:rollback MIGRATION=20140407162007_add_foo.rb
 ```
 
 ### Registering models
 
-By default, `SeedMigration` won't seen any data after running `data:migrate`. You have to manually register the models in the configuration file.
+By default, `SeedMigration` won't seen any data after running `seed:migrate`. You have to manually register the models in the configuration file.
 
 Simply register a model:
 
@@ -126,13 +126,13 @@ SeedMigration::Migrator.bootstrap(20140404193326)
 
 ### Deployment notes
 
-It is recommended to add the `rake data:migrate` to your deploy script, so each new data migrations is ran upon new deploys.
-You can enable the `extend_native_migration_task` option to automatically run `rake data:migrate` after `rake db:migrate`.
+It is recommended to add the `rake seed:migrate` to your deploy script, so each new data migrations is ran upon new deploys.
+You can enable the `extend_native_migration_task` option to automatically run `rake seed:migrate` after `rake db:migrate`.
 
 ## Example
 
 ```ruby
-rails g seed_migration:migration AddADummyProduct
+rails g seed_migration AddADummyProduct
 ```
 
 ```ruby

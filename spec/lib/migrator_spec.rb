@@ -5,7 +5,7 @@ describe SeedMigration::Migrator do
     # Generate test migrations
     2.times do |i|
       timestamp = Time.now.utc + i
-      Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{i}", timestamp.strftime('%Y%m%d%H%M%S')])
+      Rails::Generators.invoke("seed_migration", ["TestMigration#{i}", timestamp.strftime('%Y%m%d%H%M%S')])
     end
 
     Rails.stub(env: ActiveSupport::StringInquirer.new("development"))
@@ -52,7 +52,7 @@ describe SeedMigration::Migrator do
   describe '.get_new_migrations' do
     before(:each) do
       SeedMigration::Migrator.run_new_migrations
-      Rails::Generators.invoke("seed_migration:migration", ["TestMigrationBefore", 5.days.ago.utc.strftime("%Y%m%d%H%M%S")])
+      Rails::Generators.invoke("seed_migration", ["TestMigrationBefore", 5.days.ago.utc.strftime("%Y%m%d%H%M%S")])
     end
 
     it 'runs all non ran migrations' do
@@ -197,8 +197,8 @@ describe SeedMigration::Migrator do
       let(:timestamp1) { 1.minutes.from_now.strftime('%Y%m%d%H%M%S') }
       let(:timestamp2) { 2.minutes.from_now.strftime('%Y%m%d%H%M%S') }
       it 'returns migration up to the given timestamp' do
-        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp1}", timestamp1])
-        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp2}", timestamp2])
+        Rails::Generators.invoke("seed_migration", ["TestMigration#{timestamp1}", timestamp1])
+        Rails::Generators.invoke("seed_migration", ["TestMigration#{timestamp2}", timestamp2])
 
         SeedMigration::Migrator.get_migration_files(timestamp1).length.should eq(3)
       end
@@ -218,8 +218,8 @@ describe SeedMigration::Migrator do
       let(:timestamp2) { 2.minutes.from_now.strftime('%Y%m%d%H%M%S') }
 
       it 'marks migrations prior to timestamp'do
-        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp1}", timestamp1])
-        Rails::Generators.invoke("seed_migration:migration", ["TestMigration#{timestamp2}", timestamp2])
+        Rails::Generators.invoke("seed_migration", ["TestMigration#{timestamp1}", timestamp1])
+        Rails::Generators.invoke("seed_migration", ["TestMigration#{timestamp2}", timestamp2])
 
         SeedMigration::Migrator.bootstrap(timestamp1)
         SeedMigration::DataMigration.all.length.should eq(3)

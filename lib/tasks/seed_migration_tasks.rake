@@ -1,4 +1,4 @@
-namespace :data do
+namespace :seed do
   desc "Run new data migrations."
   task :migrate => :environment do
     filename = ENV["MIGRATION"]
