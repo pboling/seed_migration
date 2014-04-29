@@ -35,7 +35,7 @@ That will create the table to keep track of data migrations.
 `SeedMigration` adds a new rails generator :
 
 ```ruby
-rails g seed_migration:migration AddFoo
+rails g seed_migration AddFoo
 ```
 A new file will be created under `db/data/` using rails migration convention:
 
@@ -132,7 +132,7 @@ You can enable the `extend_native_migration_task` option to automatically run `r
 ## Example
 
 ```ruby
-rails g seed_migration:migration AddADummyProduct
+rails g seed_migration AddADummyProduct
 ```
 
 ```ruby
