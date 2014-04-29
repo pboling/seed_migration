@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/harrystech/seed_migration.svg?branch=master)](https://travis-ci.org/harrystech/seed_migration)
+[![Build Status](https://travis-ci.org/harrystech/seed_migration.svg?branch=master)](https://travis-ci.org/harrystech/seed_migration) [![Gem Version](https://badge.fury.io/rb/seed_migration.svg)](http://badge.fury.io/rb/seed_migration)
 
 # SeedMigration
 
