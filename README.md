@@ -14,10 +14,8 @@ Using this auto generated seed file makes it quick and easy to setup new environ
 Add `gem 'seed_migration'` to your `Gemfile`:
 
 ```ruby
-gem 'seed_migration', :github => 'harrystech/seed_migration'
+gem 'seed_migration'
 ```
-
-Note : It'll soon be released on rubygems.org.
 
 ## Usage
 
@@ -32,7 +30,7 @@ That will create the table to keep track of data migrations.
 
 ### Generate a new migration
 
-`SeedMigration` adds a new rails generator :
+You can use the generator :
 
 ```ruby
 rails g seed_migration AddFoo
@@ -81,7 +79,8 @@ rake seed:rollback MIGRATION=20140407162007_add_foo.rb
 
 ### Registering models
 
-By default, `SeedMigration` won't seen any data after running `seed:migrate`. You have to manually register the models in the configuration file.
+By default no models are registered, so running seed migrations won't update the seeds file.
+You have to manually register the models in the configuration file.
 
 Simply register a model:
 
@@ -113,16 +112,26 @@ This will create a `seeds.rb` containing all User and Product in the database:
 # It's strongly recommended to check this file into your version control system.
 
 ActiveRecord::Base.transaction do
-  Product.create("id"=>1, "name"=>"foo", "created_at"=>"2014-04-04T15:42:24Z", "updated_at"=>"2014-04-04T15:42:24Z")
-  Product.create("id"=>2, "name"=>"bar", "created_at"=>"2014-04-04T15:42:24Z", "updated_at"=>"2014-04-04T15:42:24Z")
+  Product.create("created_at"=>"2014-04-04T15:42:24Z", "id"=>1, "name"=>"foo", "updated_at"=>"2014-04-04T15:42:24Z")
+  Product.create("created_at"=>"2014-04-04T15:42:24Z", "id"=>2, "name"=>"bar", "updated_at"=>"2014-04-04T15:42:24Z")
   # ...
-  User.create("id"=>1, "name"=>"admin", "created_at"=>"2014-04-04T15:42:24Z", "updated_at"=>"2014-04-04T15:42:24Z")
+  User.create("created_at"=>"2014-04-04T15:42:24Z", "id"=>1, "name"=>"admin", "updated_at"=>"2014-04-04T15:42:24Z")
   # ...
 end
 
 SeedMigration::Migrator.bootstrap(20140404193326)
 ```
 
+### Adding seed_migrations to an existing app
+
+If your app already contains seeds, using this gem could cause some issues.
+Here is the basic process to follow to ensure a smooth transition:
+
+- Clean your local database, and seed it, that can be done with `rake db:reset`
+- register all the models that were created in the original seeds file
+- run `rake seed:migrate`
+- At this point, your seeds file will be rewritten with all the `create!` statements
+- Commit/Push the updated seeds file
 
 ### Deployment notes
 
@@ -154,7 +163,7 @@ end
 
 ## Configuration
 
-`SeedMigration` can be configured using an initializer file.
+Use an initializer file for configuration.
 
 ### List of available configurations :
 
