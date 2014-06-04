@@ -2,4 +2,4 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem "rails", "~> 3.2.17"
+gem "rails", ">= 3.2.17"
