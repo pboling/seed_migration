@@ -168,7 +168,6 @@ Use an initializer file for configuration.
 ### List of available configurations :
 
 - `extend_native_migration_task (default=false)`
-- `pending_migrations_warning_level (default=:warn)`
 - `ignore_ids (default=false)`
 - `migration_table_name (default='seed_migration_data_migrations')`: Override the table name for the internal model that holds the migrations
 
@@ -180,7 +179,6 @@ Use an initializer file for configuration.
 SeedMigration.config do |c|
     c.migration_table_name = 'data_migrations'
     c.extend_native_migration_task = true
-    c.pending_migrations_warning_level = :error
 end
 
 SeedMigration.register User do
