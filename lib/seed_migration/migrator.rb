@@ -68,6 +68,16 @@ module SeedMigration
         migration = migration_path(migration)
         new(migration).up
       end
+    end
+
+    def self.run_migrations(filename = nil)
+      if filename.blank?
+        # Run any outstanding migrations
+        run_new_migrations
+      else
+        path = self.migration_path(filename)
+        new(path).up
+      end
       create_seed_file
     end
 
@@ -75,10 +85,15 @@ module SeedMigration
       return SeedMigration::DataMigration.maximum("version")
     end
 
-    def self.rollback_migrations(steps = 1)
-      to_run = get_last_x_migrations(steps)
-      to_run.each do |migration|
-        new(migration).down
+    def self.rollback_migrations(filename = nil, steps = 1)
+      if filename.blank?
+        to_run = get_last_x_migrations(steps)
+        to_run.each do |migration|
+          new(migration).down
+        end
+      else
+        path = SeedMigration::Migrator.migration_path(filename)
+        SeedMigration::Migrator.new(path).down
       end
       create_seed_file
     end

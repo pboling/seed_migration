@@ -70,6 +70,7 @@ describe SeedMigration::Migrator do
 
     describe "rake rollback" do
       it "should by default roll back one step" do
+        SeedMigration::Migrator.should_receive(:create_seed_file).once
         # Run migrations
         SeedMigration::Migrator.run_new_migrations
 
@@ -79,11 +80,20 @@ describe SeedMigration::Migrator do
       end
 
       it "should roll back more than one if specified" do
+        SeedMigration::Migrator.should_receive(:create_seed_file).once
         # Run migrations
         SeedMigration::Migrator.run_new_migrations
 
         # Rollback
-        expect { SeedMigration::Migrator.rollback_migrations(2) }.to change { SeedMigration::DataMigration.count }.by(-2)
+        expect { SeedMigration::Migrator.rollback_migrations(nil, 2) }.to change { SeedMigration::DataMigration.count }.by(-2)
+      end
+
+      it "should roll back specified migration" do
+        Rails::Generators.invoke("seed_migration", ["foo", 1])
+        # Run the migration
+        SeedMigration::Migrator.any_instance.should_receive(:down).once
+        SeedMigration::Migrator.should_receive(:create_seed_file).once
+        SeedMigration::Migrator.rollback_migrations('1_foo.rb')
       end
     end
   end
@@ -101,7 +111,7 @@ describe SeedMigration::Migrator do
       UselessModel.delete_all
     end
 
-    before(:each) { SeedMigration::Migrator.run_new_migrations }
+    before(:each) { SeedMigration::Migrator.run_migrations }
     let(:contents) { File.read(SeedMigration::Migrator::SEEDS_FILE_PATH) }
 
     context 'models' do
@@ -238,6 +248,24 @@ describe SeedMigration::Migrator do
       before(:each) { SeedMigration::Migrator.run_new_migrations }
       it 'runs migrations' do
         expect{ SeedMigration::Migrator.run_new_migrations }.to_not raise_error
+      end
+    end
+  end
+
+  describe '.run_migrations' do
+    context 'without parameters' do
+      it 'run migrations' do
+        SeedMigration::Migrator.should_receive(:run_new_migrations)
+        SeedMigration::Migrator.should_receive(:create_seed_file).once
+        SeedMigration::Migrator.run_migrations
+      end
+    end
+    context 'with migration parameter' do
+      it 'run migrations' do
+        Rails::Generators.invoke("seed_migration", ["foo", 1])
+        SeedMigration::Migrator.any_instance.should_receive(:up).once
+        SeedMigration::Migrator.should_receive(:create_seed_file).once
+        SeedMigration::Migrator.run_migrations('1_foo.rb')
       end
     end
   end
