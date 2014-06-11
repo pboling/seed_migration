@@ -8,8 +8,8 @@ require "seed_migration/version"
 Gem::Specification.new do |s|
   s.name          = "seed_migration"
   s.version       = SeedMigration::VERSION
-  s.authors       = ["Andy O'Neill", "Daniel Schwartz"]
-  s.email         = ["aoneill@harrys.com",  'daniel@harrys.com']
+  s.authors       = ["Andy O'Neill", "Daniel Schwartz", "Ilya Rubnich", "Pierre Jambet"]
+  s.email         = ["aoneill@harrys.com",  'daniel@harrys.com', 'ilya@harrys.com', 'pierre@harrys.com']
   s.description   = %q{Rails gem for Data Migrations}
   s.summary       = %q{Rails Data Migration}
   s.homepage      = "http://github.com/harrystech/seed_migration"
