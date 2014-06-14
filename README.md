@@ -187,6 +187,88 @@ end
 SeedMigration.register Product
 ```
 
+## Schema conflicts
+
+SeedMigration is built to work with your schema updates, as they are common in
+most systems.  Here is an example to illustrate how to deal with schema
+updates:
+
+#### Initial setup
+
+Let's take one seeded model: `Product`, with three columns `id, name,
+description`.
+
+You write your first seed migration, to capitalize all products' name:
+
+`rails g seed_migration CapitalizeProducts`
+
+```ruby
+# db/data/20140604185727_capitalize_products.rb
+class CapitalizeProducts < SeedMigration::Migration
+  def up
+    Product.all.each { |p| p.update_attributes(:name => p.name.capitalize) }
+  end
+
+  def down
+    # Let's ignore down in that example
+  end
+end
+```
+
+The database has a few products, so after running `seed:migrate` for the first
+time, your seeds file should look something like:
+
+```ruby
+...
+Product.create(:id=>1,:name=>"Prod1",:description=>"Desc for prod1...")
+Product.create(:id=>2,:name=>"Prod2",:description=>"Desc for prod2 ...")
+...
+SeedMigration::Migrator.bootstrap(20140604185727)
+```
+
+The timestamp passed to the bootstrap method identifies the last migration ran
+(note that it is the same timestamp used in the migration's file name).  So if
+you want to bootstrap a new environment, running `rake db:seed` will create all
+Product and then will mark all the migrations up to 20140604185727 as applied.
+That means that running `seed:migrate` won't run anything as the migration is
+considered already applied.
+
+#### Updating the schema
+
+Let's imagine that, for some reasons, you want to remove products' name, you
+write a rails migrations that drops the column from the `products` table.
+After running this schema migration, your seeds file is broken and your seed
+migration are broken as they operate on a non existing column: `name`.
+
+The solution to fix it is to run `rake seed:migrate`. Even if it won't run any
+seed migrations (the only seed migration is already marked as applied), it will
+update the seeds file with the current content of your datase. So the seeds
+file would look something like.
+
+```ruby
+...
+Product.create(:id=>1,:description=>"Desc for prod1 ...")
+Product.create(:id=>2,:description=>"Desc for prod2 ...")
+...
+SeedMigration::Migrator.bootstrap(20140604185727)
+```
+
+The column `name` does not appear in the seeds anymore.
+
+Now that the seeds file is fixed you can safely use it to bootstrap a new
+environment.
+
+#### Applying changes to a production environment
+
+We never ended up in a situation where a seed migration would error on a
+production environment, though it is possible to create such a situation.
+
+In our previous example, if the migration that drops the name column is ran
+before the seed migration that updates the name, then it wouldn't be possible
+to run the seed migration anymore.  In such situations this would be an
+indicator that the seed migrations is outdated, and should be deleted or
+updated.
+
 ## Compatibility
 
 At the moment, we rely by default on
