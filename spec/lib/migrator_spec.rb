@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 describe SeedMigration::Migrator do
   before :each do
@@ -198,7 +197,7 @@ describe SeedMigration::Migrator do
   end
 
   describe "seeds file evaluation" do
-    before(:all) do
+    before(:each) do
       2.times { |i| u = User.new; u.username = i; u.save }
       2.times { |i| Product.create }
       2.times { |i| UselessModel.create }
@@ -206,23 +205,21 @@ describe SeedMigration::Migrator do
       SeedMigration.ignore_ids = true
       SeedMigration.register User
       SeedMigration.register Product
+
+      SeedMigration::Migrator.run_migrations
     end
 
-    after(:all) do
+    after(:each) do
       User.delete_all
       Product.delete_all
       UselessModel.delete_all
     end
-
-
-    before(:each) { SeedMigration::Migrator.run_migrations }
 
     it 'creates seeds.rb file' do
       File.exists?(File.join(Rails.root, 'db', 'seeds.rb')).should be_true
     end
 
     it 'evaluates without throwing any errors' do
-      binding.pry
       load File.join(Rails.root, 'db', 'seeds.rb')
     end
   end
