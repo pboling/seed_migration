@@ -238,9 +238,17 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       attributes.sort.each do |key, value|
         sorted_attributes[key] = value
       end
+
+      if Rails::VERSION::MAJOR == 3
+        model_creation_string = "#{instance.class}.create(#{JSON.parse(sorted_attributes.to_json).to_s}, :without_protection => true)"
+      elsif Rails::VERSION::MAJOR == 4
+        model_creation_string = "#{instance.class}.create(#{JSON.parse(sorted_attributes.to_json).to_s})"
+      end
+
+      # With pretty indents, please.
       return <<-eos
 
-  #{instance.class}.create(#{JSON.parse(sorted_attributes.to_json).to_s}, :without_protection => true)
+  #{model_creation_string}
       eos
     end
   end

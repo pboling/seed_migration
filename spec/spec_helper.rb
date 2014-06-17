@@ -30,4 +30,9 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = 'random'
+  config.after(:all) do
+    if File.exists?(SeedMigration::Migrator::SEEDS_FILE_PATH)
+      File.delete(SeedMigration::Migrator::SEEDS_FILE_PATH)
+    end
+  end
 end
