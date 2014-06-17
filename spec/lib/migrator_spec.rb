@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'pry'
 
 describe SeedMigration::Migrator do
   before :each do
@@ -196,6 +197,36 @@ describe SeedMigration::Migrator do
     end
   end
 
+  describe "seeds file evaluation" do
+    before(:all) do
+      2.times { |i| u = User.new; u.username = i; u.save }
+      2.times { |i| Product.create }
+      2.times { |i| UselessModel.create }
+
+      SeedMigration.ignore_ids = true
+      SeedMigration.register User
+      SeedMigration.register Product
+    end
+
+    after(:all) do
+      User.delete_all
+      Product.delete_all
+      UselessModel.delete_all
+    end
+
+
+    before(:each) { SeedMigration::Migrator.run_migrations }
+
+    it 'creates seeds.rb file' do
+      File.exists?(File.join(Rails.root, 'db', 'seeds.rb')).should be_true
+    end
+
+    it 'evaluates without throwing any errors' do
+      binding.pry
+      load File.join(Rails.root, 'db', 'seeds.rb')
+    end
+  end
+
   describe '.get_migration_files' do
     context 'without params' do
       it 'return all migrations' do
@@ -241,6 +272,7 @@ describe SeedMigration::Migrator do
     context 'with pending migrations' do
       it 'runs migrations' do
         expect{ SeedMigration::Migrator.run_new_migrations }.to_not raise_error
+
       end
     end
 
