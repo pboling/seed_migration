@@ -122,6 +122,8 @@ end
 SeedMigration::Migrator.bootstrap(20140404193326)
 ```
 
+Note that `seeds.rb` is only generated in development mode.  Production data will not be dumped in this process.
+
 ### Adding seed_migrations to an existing app
 
 If your app already contains seeds, using this gem could cause some issues.
