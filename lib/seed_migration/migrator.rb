@@ -1,4 +1,5 @@
 require 'pathname'
+require 'seed_migration/data_migration'
 
 module SeedMigration
   class Migrator
