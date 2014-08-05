@@ -33,5 +33,6 @@ module SeedMigration
       g.helper false
     end
 
+    Dir["#{config.root}/app/models/**/*.rb"].each { |file| require file }
   end
 end
