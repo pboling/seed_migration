@@ -5,6 +5,7 @@ module SeedMigration
   autoload :Migrator, "seed_migration/migrator" # Is it needed ?
   autoload :Migration, "seed_migration/migration"
   autoload :RegisterEntry, "seed_migration/register_entry"
+  autoload :DataMigration, "seed_migration/data_migration"
 
   @@registrar = Set.new
   mattr_accessor :registrar
