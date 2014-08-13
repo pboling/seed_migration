@@ -4,6 +4,9 @@ rvm:
   - 2.1.0
 before_script: RAILS_ENV=test bundle exec rake app:db:reset
 script: bundle exec rspec spec
+env:
+  - THREADSAFE=true
+  - THREADSAFE=false
 gemfile:
   - gemfiles/Gemfile.rails-4.0-stable
   - gemfiles/Gemfile.rails-3.2-stable
