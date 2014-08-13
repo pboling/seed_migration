@@ -36,4 +36,13 @@ describe 'Rake Tasks' do
       end
     end
   end
+
+  context 'raw task' do
+    before { Dir.chdir 'spec/dummy' }
+    after { Dir.chdir '../..' }
+    it 'works' do
+      output = system("bundle exec rake seed:migrate")
+      output.should eq(true)
+    end
+  end
 end
