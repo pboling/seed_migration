@@ -6,6 +6,6 @@ namespace :seed do
 
   desc "Revert last data migration."
   task :rollback => :environment do
-    SeedMigration::Migrator.rollback_migrations(ENV["MIGRATION"], ENV["STEP"] || 1)
+    SeedMigration::Migrator.rollback_migrations(ENV["MIGRATION"], ENV["STEP"] || ENV["STEPS"] || 1)
   end
 end
