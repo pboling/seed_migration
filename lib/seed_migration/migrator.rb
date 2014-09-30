@@ -22,21 +22,23 @@ module SeedMigration
 
       start_time = Time.now
       announce("#{klass}: migrating")
-      klass.new.up
-      end_time = Time.now
-      runtime = (end_time - start_time).to_d.round(2)
+      ActiveRecord::Base.transaction do
+        klass.new.up
+        end_time = Time.now
+        runtime = (end_time - start_time).to_d.round(2)
 
-      # Create record
-      migration = SeedMigration::DataMigration.new
-      migration.version = version
-      migration.runtime = runtime.to_i
-      migration.migrated_on = DateTime.now
-      begin
-        migration.save!
-      rescue Exception => e
-        puts e
+        # Create record
+        migration = SeedMigration::DataMigration.new
+        migration.version = version
+        migration.runtime = runtime.to_i
+        migration.migrated_on = DateTime.now
+        begin
+          migration.save!
+        rescue Exception => e
+          puts e
+        end
+        announce("#{klass}: migrated (#{runtime}s)")
       end
-      announce("#{klass}: migrated (#{runtime}s)")
     end
 
     def down
@@ -52,13 +54,15 @@ module SeedMigration
       # Revert
       start_time = Time.now
       announce("#{klass}: reverting")
-      klass.new.down
-      end_time = Time.now
-      runtime = (end_time - start_time).to_d.round(2)
+      ActiveRecord::Base.transaction do
+        klass.new.down
+        end_time = Time.now
+        runtime = (end_time - start_time).to_d.round(2)
 
-      # Delete record of migration
-      migration.destroy
-      announce("#{klass}: reverted (#{runtime}s)")
+        # Delete record of migration
+        migration.destroy
+        announce("#{klass}: reverted (#{runtime}s)")
+      end
     end
 
     # Rake methods
