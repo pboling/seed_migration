@@ -195,7 +195,7 @@ module SeedMigration
     end
 
     def self.create_seed_file
-      if !Rails.env.development?
+      if !Rails.env.development? || SeedMigration.ignore_create_seed_file
         return
       end
       File.open(SEEDS_FILE_PATH, 'w') do |file|
