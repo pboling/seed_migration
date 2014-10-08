@@ -6,12 +6,12 @@ module SeedMigration
     mattr_accessor :extend_native_migration_task
     mattr_accessor :migration_table_name
     mattr_accessor :ignore_ids
-    mattr_accessor :ignore_create_seed_file
+    mattr_accessor :update_seeds_file
 
     self.migration_table_name = 'seed_migration_data_migrations' # Hardcoded, evil!
     self.extend_native_migration_task = false
     self.ignore_ids = false
-    self.ignore_create_seed_file = false
+    self.update_seeds_file = true
   end
 
   def self.config(&block)
