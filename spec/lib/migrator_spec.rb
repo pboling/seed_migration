@@ -114,9 +114,31 @@ describe SeedMigration::Migrator do
     before(:each) { SeedMigration::Migrator.run_migrations }
     let(:contents) { File.read(SeedMigration::Migrator::SEEDS_FILE_PATH) }
 
+    context 'when not updating seeds file' do
+      before(:all) do
+        SeedMigration.ignore_ids = false
+        SeedMigration.update_seeds_file = false
+        SeedMigration.register User
+        SeedMigration.register Product
+        FileUtils.rm(SeedMigration::Migrator::SEEDS_FILE_PATH)
+        SeedMigration::Migrator.run_new_migrations
+      end
+
+      it 'should not creates seeds.rb file' do
+        File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should be_false
+      end
+
+      after(:all) do
+        # generate seeds.rb
+        SeedMigration.update_seeds_file = true
+        SeedMigration::Migrator.run_new_migrations
+      end
+    end
+
     context 'models' do
       before(:all) do
         SeedMigration.ignore_ids = false
+        SeedMigration.update_seeds_file = true
         SeedMigration.register User
         SeedMigration.register Product
       end
@@ -203,6 +225,7 @@ describe SeedMigration::Migrator do
       2.times { |i| UselessModel.create }
 
       SeedMigration.ignore_ids = true
+      SeedMigration.update_seeds_file = true
       SeedMigration.register User
       SeedMigration.register Product
 
