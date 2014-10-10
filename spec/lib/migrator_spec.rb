@@ -120,14 +120,30 @@ describe SeedMigration::Migrator do
         SeedMigration.update_seeds_file = false
         SeedMigration.register User
         SeedMigration.register Product
-        if File.exists? SeedMigration::Migrator::SEEDS_FILE_PATH
-          FileUtils.rm(SeedMigration::Migrator::SEEDS_FILE_PATH)
-        end
-        SeedMigration::Migrator.run_new_migrations
       end
 
-      it 'should not creates seeds.rb file' do
-        File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should be_false
+      context "when exists seeds file" do
+        before(:all) do
+          File.write(SeedMigration::Migrator::SEEDS_FILE_PATH, 'dummy seeds script')
+          SeedMigration::Migrator.run_new_migrations
+        end
+
+        it "should not update seeds.rb file" do
+          expect(File.read(SeedMigration::Migrator::SEEDS_FILE_PATH)).to eq 'dummy seeds script'
+        end
+      end
+
+      context "when not exists seeds file" do
+        before(:all) do
+          if File.exists? SeedMigration::Migrator::SEEDS_FILE_PATH
+            FileUtils.rm(SeedMigration::Migrator::SEEDS_FILE_PATH)
+          end
+          SeedMigration::Migrator.run_new_migrations
+        end
+
+        it 'should not creates seeds.rb file' do
+          File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should be_false
+        end
       end
 
       after(:all) do
