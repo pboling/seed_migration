@@ -120,7 +120,9 @@ describe SeedMigration::Migrator do
         SeedMigration.update_seeds_file = false
         SeedMigration.register User
         SeedMigration.register Product
-        FileUtils.rm(SeedMigration::Migrator::SEEDS_FILE_PATH)
+        if File.exists? SeedMigration::Migrator::SEEDS_FILE_PATH
+          FileUtils.rm(SeedMigration::Migrator::SEEDS_FILE_PATH)
+        end
         SeedMigration::Migrator.run_new_migrations
       end
 
