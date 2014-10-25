@@ -339,4 +339,32 @@ describe SeedMigration::Migrator do
       end
     end
   end
+
+  describe ".migrations_path" do
+
+    context "with default path" do
+      it 'it should create migrations in db/data' do
+        SeedMigration::Migrator.get_migration_files.each do |f|
+          expect(File.split(File.dirname(f))[1]).to eq("data")
+        end
+      end
+    end
+
+    context "with custom path" do
+      before(:all) do
+        SeedMigration.migrations_path = "foo"
+      end
+
+      after(:all) do
+        SeedMigration.migrations_path = "data"
+      end
+
+      it 'it should create migrations in db/foo' do
+        SeedMigration::Migrator.get_migration_files.each do |f|
+          expect(File.split(File.dirname(f))[1]).to eq("foo")
+        end
+      end
+    end
+
+  end
 end

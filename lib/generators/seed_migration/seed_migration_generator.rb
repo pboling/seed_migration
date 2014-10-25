@@ -10,7 +10,7 @@ module SeedMigration
       argument :timestamp, :type => :string, :required => false, :default => Time.now.utc.strftime("%Y%m%d%H%M%S")
 
       def create_seed_migration_file
-        path = SeedMigration::Migrator::DATA_MIGRATION_DIRECTORY
+        path = SeedMigration::Migrator.data_migration_directory
         create_file path.join("#{timestamp}_#{file_name.gsub(/([A-Z])/, '_\1').downcase}.rb"), contents
       end
 
