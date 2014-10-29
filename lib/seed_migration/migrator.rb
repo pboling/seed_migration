@@ -2,11 +2,14 @@ require 'pathname'
 
 module SeedMigration
   class Migrator
-    DATA_MIGRATION_DIRECTORY = Rails.root.join("db", "data")
     SEEDS_FILE_PATH = Rails.root.join('db', 'seeds.rb')
 
+    def self.data_migration_directory
+      Rails.root.join("db", SeedMigration.migrations_path)
+    end
+
     def self.migration_path(filename)
-      DATA_MIGRATION_DIRECTORY.join(filename).to_s
+      data_migration_directory.join(filename).to_s
     end
 
     def initialize(migration_path)
