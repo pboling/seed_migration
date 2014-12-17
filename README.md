@@ -140,6 +140,19 @@ Here is the basic process to follow to ensure a smooth transition:
 It is recommended to add the `rake seed:migrate` to your deploy script, so each new data migrations is ran upon new deploys.
 You can enable the `extend_native_migration_task` option to automatically run `rake seed:migrate` after `rake db:migrate`.
 
+For Capistrano 3.x support, add this to your Capfile
+
+```ruby
+require 'capistrano/seed_migration_tasks'
+```
+
+which provides the two cap tasks, which you can add to your deploy script or run on the command line:
+
+```ruby
+cap {stage} seed:migrate
+cap {stage} seed:rollback
+```
+
 ## Example
 
 ```ruby
