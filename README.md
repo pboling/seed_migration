@@ -68,7 +68,7 @@ rake seed:rollback
 You can rollback more than one migration at the same time:
 
 ```ruby
-rake seed:rollback STEPS=3 # rollback last 3 migrations
+rake seed:rollback STEP=3 # rollback last 3 migrations
 ```
 
 Or rollback a specific migration:
