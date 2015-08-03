@@ -3,6 +3,7 @@ language: ruby
 rvm:
   - 2.0.0
   - 2.1.0
+  - 2.2.2
 before_script: RAILS_ENV=test bundle exec rake app:db:reset
 script: bundle exec rspec spec
 env:
