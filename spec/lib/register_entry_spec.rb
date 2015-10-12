@@ -41,4 +41,19 @@ describe SeedMigration::RegisterEntry do
       end
     end
   end
+
+  describe '#ordering' do
+    context 'given no arguments' do
+      it 'sets the ordering to the default' do
+        entry.order.should eq('id')
+      end
+    end
+
+    context 'given ordering arguments' do
+      it 'sets the ordering to the passed ordering' do
+        entry.order :example
+        entry.order.should eq(:example)
+      end
+    end
+  end
 end
