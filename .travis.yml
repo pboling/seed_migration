@@ -10,6 +10,7 @@ env:
   - THREADSAFE=true
   - THREADSAFE=false
 gemfile:
+  - gemfiles/Gemfile.rails-4.2-stable
   - gemfiles/Gemfile.rails-4.1-stable
   - gemfiles/Gemfile.rails-4.0-stable
   - gemfiles/Gemfile.rails-3.2-stable
