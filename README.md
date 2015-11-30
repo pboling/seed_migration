@@ -185,6 +185,7 @@ Use an initializer file for configuration.
 - `extend_native_migration_task (default=false)`
 - `ignore_ids (default=false)`
 - `migration_table_name (default='seed_migration_data_migrations')`: Override the table name for the internal model that holds the migrations
+- `use_strict_create (default=false)`: Use `create!` instead of `create` in `db/seeds.rb` when set to true
 
 #### example:
 
