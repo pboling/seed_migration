@@ -185,6 +185,19 @@ describe SeedMigration::Migrator do
       it 'should output attributes alphabetically ordered' do
         contents.should match(/(?=.*User\.create)(?=.*"a"=>.*"id"=>.*"username"=>).*/)
       end
+
+      context 'with strict_create option' do
+        before(:all) do
+          SeedMigration.use_strict_create = true
+        end
+
+        it "outputs models creation with the bang method" do
+          contents.should_not be_nil
+          contents.should_not be_empty
+          contents.should include("User.create!")
+          contents.should include("Product.create!")
+        end
+      end
     end
 
     context 'attributes' do
