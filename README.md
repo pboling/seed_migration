@@ -132,7 +132,7 @@ Here is the basic process to follow to ensure a smooth transition:
 - Clean your local database, and seed it, that can be done with `rake db:reset`
 - register all the models that were created in the original seeds file
 - run `rake seed:migrate`
-- At this point, your seeds file will be rewritten with all the `create!` statements
+- At this point, your seeds file will be rewritten with all the `create` statements
 - Commit/Push the updated seeds file
 
 ### Deployment notes
