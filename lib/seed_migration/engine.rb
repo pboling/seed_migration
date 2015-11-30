@@ -8,12 +8,14 @@ module SeedMigration
     mattr_accessor :ignore_ids
     mattr_accessor :update_seeds_file
     mattr_accessor :migrations_path
+    mattr_accessor :use_strict_create
 
     self.migration_table_name = 'seed_migration_data_migrations' # Hardcoded, evil!
     self.extend_native_migration_task = false
     self.ignore_ids = false
     self.update_seeds_file = true
     self.migrations_path = 'data'
+    self.use_strict_create = false
   end
 
   def self.config(&block)
@@ -25,6 +27,10 @@ module SeedMigration
     if self.extend_native_migration_task
       require_relative '../extra_tasks.rb'
     end
+  end
+
+  def self.use_strict_create?
+    use_strict_create
   end
 
   class Engine < ::Rails::Engine

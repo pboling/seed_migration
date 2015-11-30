@@ -247,9 +247,9 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       end
 
       if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
-        model_creation_string = "#{instance.class}.create(#{JSON.parse(sorted_attributes.to_json).to_s}, :without_protection => true)"
+        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json).to_s}, :without_protection => true)"
       elsif Rails::VERSION::MAJOR == 4
-        model_creation_string = "#{instance.class}.create(#{JSON.parse(sorted_attributes.to_json).to_s})"
+        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json).to_s})"
       end
 
       # With pretty indents, please.
@@ -257,6 +257,10 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
 
   #{model_creation_string}
       eos
+    end
+
+    def self.create_method
+      SeedMigration.use_strict_create? ? 'create!' : 'create'
     end
   end
 end
