@@ -18,7 +18,7 @@ module SeedMigration
     self.use_strict_create = false
   end
 
-  def self.config(&block)
+  def self.config
     yield self
     after_config
   end
