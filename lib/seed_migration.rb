@@ -14,7 +14,7 @@ module SeedMigration
     def register(model, &block)
       unregister model
       entry = RegisterEntry.new(model)
-      entry.instance_eval &block if block_given?
+      entry.instance_eval(&block) if block_given?
 
       self.registrar << entry
     end
