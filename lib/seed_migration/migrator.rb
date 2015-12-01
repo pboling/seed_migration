@@ -14,7 +14,7 @@ module SeedMigration
 
     def initialize(migration_path)
       @path = Pathname.new(migration_path)
-      raise "Can't find migration at #{@path.to_s}." if !@path.exist?
+      raise "Can't find migration at #{@path}." if !@path.exist?
     end
 
     def up
@@ -247,9 +247,9 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       end
 
       if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json).to_s}, :without_protection => true)"
+        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
       elsif Rails::VERSION::MAJOR == 4
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json).to_s})"
+        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
       end
 
       # With pretty indents, please.
