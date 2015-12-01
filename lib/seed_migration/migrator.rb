@@ -37,7 +37,7 @@ module SeedMigration
         migration.migrated_on = DateTime.now
         begin
           migration.save!
-        rescue Exception => e
+        rescue StandardError => e
           puts e
         end
         announce("#{klass}: migrated (#{runtime}s)")
