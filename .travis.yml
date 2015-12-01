@@ -26,3 +26,6 @@ notifications:
     hipchat:
         rooms:
             - secure: "cVvKnySyhAuBtAqXKwxsMamfjkGe63OldAdP4eSNv6syr0BNcJirfDN6OsH1bzAbvCq/lEK1udLDzPrEsP0S51zBG2tGaeY7pXeBhHigBGFmC6wsAfMtPkDTyursm6f6Orl0LrMB4RPTNi6RFXdKDvTk430NBjh8YgKkZ7EzBtg="
+addons:
+    code_climate:
+        repo_token: c209fccefc8ce2e54a4ba49867ab7762023ba326a836616eb36afe8016bd56bf

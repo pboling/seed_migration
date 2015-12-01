@@ -21,5 +21,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec-rails", '2.14.2'
   s.add_development_dependency "rspec-mocks"
   s.add_development_dependency "test-unit", "~> 3.0"
+  s.add_development_dependency "codeclimate-test-reporter"
 
 end
