@@ -252,6 +252,26 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
         model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json).to_s})"
       end
 
+      if register_entry.associations.any?
+        model_creation_string << "\n"
+      end
+      register_entry.associations.each do |association|
+        case association
+        when ActiveRecord::Reflection::HasAndBelongsToManyReflection
+          # TODO: Refactor this shit
+          name = association.name
+          instance.send(name).all.each do |item|
+            sorted_attributes = {}
+            item.attributes.sort.each do |key, value|
+              sorted_attributes[key] = value
+            end
+            model_creation_string << "  #{instance.class.name.underscore.downcase}.#{name}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})\n"
+          end
+        else
+          'Poop'
+        end
+      end
+
       # With pretty indents, please.
       return <<-eos
 

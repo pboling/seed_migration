@@ -96,6 +96,12 @@ SeedMigration.register User do
 end
 ```
 
+```ruby
+SeedMigration.register Assembly do
+  associations :parts
+end
+```
+
 This will create a `seeds.rb` containing all User and Product in the database:
 
 ```ruby

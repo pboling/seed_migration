@@ -198,6 +198,24 @@ describe SeedMigration::Migrator do
           contents.should include("Product.create!")
         end
       end
+
+      context 'with associations' do
+        before(:all) do
+          Assembly.delete_all
+          2.times { Assembly.create! }
+          assembly = Assembly.create
+          3.times { assembly.parts.create! }
+
+          SeedMigration.register Assembly do
+            add_associations :parts
+          end
+        end
+
+        it "outputs the creation statements for the habtm" do
+          expect(contents).to include('Assembly.create')
+          expect(contents).to include('assembly.parts.create')
+        end
+      end
     end
 
     context 'attributes' do
