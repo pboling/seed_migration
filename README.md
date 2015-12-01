@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/harrystech/seed_migration.svg?branch=master)](https://travis-ci.org/harrystech/seed_migration) [![Gem Version](https://badge.fury.io/rb/seed_migration.svg)](http://badge.fury.io/rb/seed_migration)
+[![Build Status](https://travis-ci.org/harrystech/seed_migration.svg?branch=master)](https://travis-ci.org/harrystech/seed_migration) [![Gem Version](https://badge.fury.io/rb/seed_migration.svg)](http://badge.fury.io/rb/seed_migration)[![Code Climate](https://codeclimate.com/repos/565d2ab865f101004800136a/badges/22e9c1da0befd44cac82/gpa.svg)](https://codeclimate.com/repos/565d2ab865f101004800136a/feed)<a href="https://codeclimate.com/repos/565d2ab865f101004800136a/coverage"><img src="https://codeclimate.com/repos/565d2ab865f101004800136a/badges/22e9c1da0befd44cac82/coverage.svg" /></a>
 
 # SeedMigration
 
