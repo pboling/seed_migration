@@ -258,7 +258,13 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       end.join(', ')
 
       if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
-        model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes}, :without_protection => true)"
+        without_protection =
+          if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
+            'without_protection: true'
+          else
+            ':without_protection => true'
+          end
+        model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes}, #{without_protection})"
       elsif Rails::VERSION::MAJOR == 4
         model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes})"
       end
