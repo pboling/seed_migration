@@ -217,8 +217,10 @@ module SeedMigration
 
 ActiveRecord::Base.transaction do
         eos
-        SeedMigration.registrar.each do |register_entry|
-          register_entry.model.order('id').each do |instance|
+        SeedMigration.registrar.each_with_index do |register_entry, register_index|
+          file.write "\n" if register_index > 0
+          register_entry.model.order('id').each_with_index do |instance, instance_index|
+            file.write "\n" if instance_index > 0
             file.write generate_model_creation_string(instance, register_entry)
           end
 
@@ -262,10 +264,7 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       end
 
       # With pretty indents, please.
-      return <<-eos
-
-  #{model_creation_string}
-      eos
+      return "  #{model_creation_string}\n"
     end
 
     def self.create_method
