@@ -178,12 +178,12 @@ describe SeedMigration::Migrator do
       end
 
       it 'should output all attributes' do
-        contents.should match(/(?=.*User\.create)(?=.*"id"=>)(?=.*"username"=>).*/)
-        contents.should match(/(?=.*Product\.create)(?=.*"id"=>)(?=.*"created_at"=>)(?=.*"updated_at"=>).*/)
+        contents.should match(/(?=.*User\.create)(?=.*'id' => )(?=.*'username' => ).*/)
+        contents.should match(/(?=.*Product\.create)(?=.*'id' => )(?=.*'created_at' => )(?=.*'updated_at' => ).*/)
       end
 
       it 'should output attributes alphabetically ordered' do
-        contents.should match(/(?=.*User\.create)(?=.*"a"=>.*"id"=>.*"username"=>).*/)
+        contents.should match(/(?=.*User\.create)(?=.*'a' => .*'id' => .*'username' => ).*/)
       end
 
       context 'with strict_create option' do
@@ -207,7 +207,7 @@ describe SeedMigration::Migrator do
         end
       end
       it 'only outputs selected attributes' do
-        contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
+        contents.should match(/(?=.*User\.create)(?!.*'id' => )(?=.*'username' => ).*/)
       end
 
       context 'ignore_ids option' do
@@ -217,7 +217,7 @@ describe SeedMigration::Migrator do
         end
 
         it "doesn't output ids" do
-          contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
+          contents.should match(/(?=.*User\.create)(?!.*'id' => )(?=.*'username' => ).*/)
         end
 
         it "doesn't reset the pk sequence" do

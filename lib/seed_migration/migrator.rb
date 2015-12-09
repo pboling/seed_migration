@@ -245,11 +245,20 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       attributes.sort.each do |key, value|
         sorted_attributes[key] = value
       end
+      parsed_attributes = JSON.parse(sorted_attributes.to_json).map do |key, value|
+        quoted_value = case value
+                       when String
+                         "'#{value}'"
+                       else
+                         value.inspect
+                       end
+        %('#{key}' => #{quoted_value})
+      end.join(', ')
 
       if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
+        model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes}, :without_protection => true)"
       elsif Rails::VERSION::MAJOR == 4
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
+        model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes})"
       end
 
       # With pretty indents, please.
