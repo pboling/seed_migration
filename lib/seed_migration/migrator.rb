@@ -68,6 +68,12 @@ module SeedMigration
       end
     end
 
+    def self.check_pending!
+      if get_new_migrations.any?
+        raise SeedMigration::Migrator::PendingMigrationError
+      end
+    end
+
     # Rake methods
     def self.run_new_migrations
       # TODO : Add warning about empty registered_models
@@ -105,31 +111,30 @@ module SeedMigration
       create_seed_file
     end
 
-    def self.bootstrap(last_timestamp = nil)
-      # replace with logger ?
-      p "Assume seed data migrated up to #{last_timestamp}"
-      files = get_migration_files(last_timestamp.to_s)
-      files.each do |file|
-        name = file.split('/').last
-        version = name.split('_').first
-        migration = SeedMigration::DataMigration.new
-        migration.version = version
-        migration.runtime = 0
-        migration.migrated_on = DateTime.now
-        migration.save!
-      end
-    end
-
     def self.display_migrations_status
       puts "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
       puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
       puts "-" * 50
 
-      up_versions = SeedMigration::DataMigration.all.map(&:version)
+      up_versions = get_all_migration_versions
       get_migration_files.each do |file|
         version, name = parse_migration_filename(file)
         status = up_versions.include?(version) ? "up" : "down"
         puts "#{status.center(8)}  #{version.ljust(14)}  #{name}"
+      end
+    end
+
+    def self.bootstrap(last_timestamp = nil)
+      # replace with logger ?
+      p "Assume seed data migrated up to #{last_timestamp}"
+      files = get_migration_files(last_timestamp.to_s)
+      files.each do |file|
+        _, version = parse_migration_filename(file)
+        migration = SeedMigration::DataMigration.new
+        migration.version = version
+        migration.runtime = 0
+        migration.migrated_on = DateTime.now
+        migration.save!
       end
     end
 
@@ -158,7 +163,7 @@ module SeedMigration
         return files
       end
 
-      all_migration_versions = SeedMigration::DataMigration.all.map(&:version)
+      all_migration_versions = get_all_migration_versions
 
       files.each do |file|
         filename = file.split('/').last
@@ -208,6 +213,10 @@ module SeedMigration
 
       # Just in case
       files.sort!
+    end
+
+    def self.get_all_migration_versions
+      SeedMigration::DataMigration.all.map(&:version)
     end
 
     def self.parse_migration_filename(filename)
@@ -281,6 +290,13 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
 
     def self.create_method
       SeedMigration.use_strict_create? ? 'create!' : 'create'
+    end
+
+    class PendingMigrationError < StandardError
+      def initialize
+        super("Data migrations are pending. To resolve this issue, "\
+          "run the following:\n\n\trake seed:migrate\n")
+      end
     end
   end
 end

@@ -49,6 +49,18 @@ describe SeedMigration::Migrator do
     end
   end
 
+  describe ".check_pending!" do
+    it "returns nil when no migrations are pending" do
+      SeedMigration::Migrator.run_new_migrations
+      expect(SeedMigration::Migrator.check_pending!).to be_nil
+    end
+
+    it 'raises a PendingMigrationError when migrations are pending' do
+      error = SeedMigration::Migrator::PendingMigrationError
+      expect { SeedMigration::Migrator.check_pending! }.to raise_error(error)
+    end
+  end
+
   describe '.get_new_migrations' do
     before(:each) do
       SeedMigration::Migrator.run_new_migrations
@@ -379,7 +391,6 @@ describe SeedMigration::Migrator do
   end
 
   describe ".migrations_path" do
-
     context "with default path" do
       it 'it should create migrations in db/data' do
         SeedMigration::Migrator.get_migration_files.each do |f|
@@ -403,6 +414,5 @@ describe SeedMigration::Migrator do
         end
       end
     end
-
   end
 end
