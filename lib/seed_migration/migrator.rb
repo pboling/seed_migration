@@ -120,6 +120,19 @@ module SeedMigration
       end
     end
 
+    def self.display_migrations_status
+      puts "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
+      puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
+      puts "-" * 50
+
+      up_versions = SeedMigration::DataMigration.all.map(&:version)
+      get_migration_files.each do |file|
+        version, name = parse_migration_filename(file)
+        status = up_versions.include?(version) ? "up" : "down"
+        puts "#{status.center(8)}  #{version.ljust(14)}  #{name}"
+      end
+    end
+
     private
 
     def class_from_path
@@ -195,6 +208,13 @@ module SeedMigration
 
       # Just in case
       files.sort!
+    end
+
+    def self.parse_migration_filename(filename)
+      basename = File.basename(filename, '.rb')
+      _, version, underscored_name = basename.match(/(\d+)_(.*)/).to_a
+      name = underscored_name.gsub("_", " ").capitalize
+      [version, name]
     end
 
     def self.create_seed_file

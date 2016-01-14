@@ -96,6 +96,31 @@ describe SeedMigration::Migrator do
         SeedMigration::Migrator.rollback_migrations('1_foo.rb')
       end
     end
+
+    describe "rake migrate:status" do
+      before(:each) do
+        SeedMigration::Migrator.run_new_migrations
+        @files = SeedMigration::Migrator.get_migration_files
+      end
+
+      it "should display the appropriate statuses after a migrate" do
+        output = capture_stdout do
+          SeedMigration::Migrator.display_migrations_status
+        end
+
+        expect(output).to contain(@files.count).occurrences_of(" up ")
+      end
+
+      it "should display the appropriate statuses after a migrate/rollback" do
+        SeedMigration::Migrator.rollback_migrations
+        output = capture_stdout do
+          SeedMigration::Migrator.display_migrations_status
+        end
+
+        expect(output).to contain(@files.count - 1).occurrences_of(" up ")
+        expect(output).to contain(1).occurrences_of(" down ")
+      end
+    end
   end
 
   describe 'seeds.rb generation' do

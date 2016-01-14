@@ -12,4 +12,13 @@ namespace :seed do
       SeedMigration::Migrator.rollback_migrations(ENV["MIGRATION"], ENV["STEP"] || ENV["STEPS"] || 1)
     end
   end
+
+  namespace :migrate do
+    if !Rake::Task.task_defined?("seed:migrate:status")
+      desc "Display status of data migrations."
+      task :status => :environment do
+        SeedMigration::Migrator.display_migrations_status
+      end
+    end
+  end
 end
