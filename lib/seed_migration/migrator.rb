@@ -250,7 +250,7 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       parsed_attributes = JSON.parse(sorted_attributes.to_json).map do |key, value|
         quoted_value = case value
                        when String
-                         "'#{value}'"
+                         "'#{value.gsub('\\', '\\\\\\').gsub("'", "\\\\'")}'"
                        else
                          value.inspect
                        end

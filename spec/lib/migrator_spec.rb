@@ -100,7 +100,7 @@ describe SeedMigration::Migrator do
 
   describe 'seeds.rb generation' do
     before(:all) do
-      2.times { |i| u = User.new; u.username = i; u.save }
+      2.times { |i| u = User.new; u.username = i; u.a = "'quoted\\'"; u.save }
       2.times { |i| Product.create }
       2.times { |i| UselessModel.create }
     end
@@ -184,6 +184,10 @@ describe SeedMigration::Migrator do
 
       it 'should output attributes alphabetically ordered' do
         contents.should match(/(?=.*User\.create)(?=.*'a' => .*'id' => .*'username' => ).*/)
+      end
+
+      it 'should output attributes with escaped single quotes' do
+        contents.should match(/(?=.*User\.create)(?=.*'a' => '\\'quoted\\\\\\'',)/)
       end
 
       context 'with strict_create option' do
