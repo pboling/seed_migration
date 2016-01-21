@@ -264,7 +264,7 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
           else
             ':without_protection => true'
           end
-        model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes}, #{without_protection})"
+        model_creation_string = "#{instance.class}.#{create_method}({#{parsed_attributes}}, #{without_protection})"
       elsif Rails::VERSION::MAJOR == 4
         model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes})"
       end
