@@ -35,4 +35,20 @@ describe SeedMigration do
       SeedMigration.registrar.map(&:model).should include(Product)
     end
   end
+
+  describe 'configuration variables' do
+    it 'does not conflict with variables in other modules' do
+      module Foo
+        class << self
+          mattr_accessor :migration_table_name
+        end
+      end
+
+      Foo.migration_table_name = 'foos'
+      SeedMigration.migration_table_name = 'bars'
+
+      expect(Foo.migration_table_name).to eq 'foos'
+      expect(SeedMigration.migration_table_name).to eq 'bars'
+    end
+  end
 end
