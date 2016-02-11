@@ -37,6 +37,10 @@ describe SeedMigration do
   end
 
   describe 'configuration variables' do
+    after do
+      SeedMigration.migration_table_name = SeedMigration::DEFAULT_TABLE_NAME
+    end
+
     it 'does not conflict with variables in other modules' do
       module Foo
         class << self
