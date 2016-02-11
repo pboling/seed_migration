@@ -2,21 +2,21 @@ require 'rails'
 
 module SeedMigration
 
-  class << self
-    mattr_accessor :extend_native_migration_task
-    mattr_accessor :migration_table_name
-    mattr_accessor :ignore_ids
-    mattr_accessor :update_seeds_file
-    mattr_accessor :migrations_path
-    mattr_accessor :use_strict_create
+  DEFAULT_TABLE_NAME = 'seed_migration_data_migrations'
 
-    self.migration_table_name = 'seed_migration_data_migrations' # Hardcoded, evil!
-    self.extend_native_migration_task = false
-    self.ignore_ids = false
-    self.update_seeds_file = true
-    self.migrations_path = 'data'
-    self.use_strict_create = false
-  end
+  mattr_accessor :extend_native_migration_task
+  mattr_accessor :migration_table_name
+  mattr_accessor :ignore_ids
+  mattr_accessor :update_seeds_file
+  mattr_accessor :migrations_path
+  mattr_accessor :use_strict_create
+
+  self.migration_table_name = DEFAULT_TABLE_NAME
+  self.extend_native_migration_task = false
+  self.ignore_ids = false
+  self.update_seeds_file = true
+  self.migrations_path = 'data'
+  self.use_strict_create = false
 
   def self.config
     yield self
