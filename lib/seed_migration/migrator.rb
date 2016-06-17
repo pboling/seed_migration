@@ -202,7 +202,8 @@ module SeedMigration
         return
       end
       File.open(SEEDS_FILE_PATH, 'w') do |file|
-        file.write <<-eos
+        if !SeedMigration.disable_referential_integrity
+          file.write <<-eos
 # encoding: UTF-8
 # This file is auto-generated from the current content of the database. Instead
 # of editing this file, please use the migrations feature of Seed Migration to
@@ -216,7 +217,25 @@ module SeedMigration
 # It's strongly recommended to check this file into your version control system.
 
 ActiveRecord::Base.transaction do
-        eos
+          eos
+        else
+          file.write <<-eos
+# encoding: UTF-8
+# This file is auto-generated from the current content of the database. Instead
+# of editing this file, please use the migrations feature of Seed Migration to
+# incrementally modify your database, and then regenerate this seed file.
+#
+# If you need to create the database on another system, you should be using
+# db:seed, not running all the migrations from scratch. The latter is a flawed
+# and unsustainable approach (the more migrations you'll amass, the slower
+# it'll run and the greater likelihood for issues).
+#
+# It's strongly recommended to check this file into your version control system.
+
+ActiveRecord::Base.connection.disable_referential_integrity
+  ActiveRecord::Base.transaction do
+          eos
+        end
         SeedMigration.registrar.each do |register_entry|
           register_entry.model.order('id').each do |instance|
             file.write generate_model_creation_string(instance, register_entry)
@@ -228,9 +247,18 @@ ActiveRecord::Base.transaction do
             eos
           end
         end
-        file.write <<-eos
+        if !SeedMigration.disable_referential_integrity
+          file.write <<-eos
 end
-
+          eos
+        else
+          file.write <<-eos
+  end
+end
+          eos
+        end
+        file.write <<-eos
+        
 SeedMigration::Migrator.bootstrap(#{last_migration})
         eos
       end

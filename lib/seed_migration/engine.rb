@@ -10,6 +10,7 @@ module SeedMigration
   mattr_accessor :update_seeds_file
   mattr_accessor :migrations_path
   mattr_accessor :use_strict_create
+  mattr_accessor :disable_referential_integrity
 
   self.migration_table_name = DEFAULT_TABLE_NAME
   self.extend_native_migration_task = false
@@ -17,6 +18,7 @@ module SeedMigration
   self.update_seeds_file = true
   self.migrations_path = 'data'
   self.use_strict_create = false
+  self.disable_referential_integrity = false
 
   def self.config
     yield self
