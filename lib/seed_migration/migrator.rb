@@ -217,7 +217,7 @@ module SeedMigration
 
         eos
         if !SeedMigration.disable_referential_integrity
-          file.write<<-eos
+          file.write <<-eos
 ActiveRecord::Base.transaction do
           eos
         else
