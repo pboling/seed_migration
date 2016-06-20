@@ -186,7 +186,7 @@ Use an initializer file for configuration.
 - `ignore_ids (default=false)`
 - `migration_table_name (default='seed_migration_data_migrations')`: Override the table name for the internal model that holds the migrations
 - `use_strict_create (default=false)`: Use `create!` instead of `create` in `db/seeds.rb` when set to true
-- `disable_referential_integrity (default=false) : Ignore referential integrity when seeding the database
+- `disable_referential_integrity (default=false)` : Ignore referential integrity when seeding the database
 
 #### example:
 
