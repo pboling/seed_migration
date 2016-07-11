@@ -22,6 +22,9 @@ gemfile:
   - gemfiles/Gemfile.rails-4.0-stable
   - gemfiles/Gemfile.rails-3.2-stable
   - Gemfile
+matrix:
+  allow_failures:
+    - gemfile: Gemfile # Not supporting rails 5 at the moment
 notifications:
     hipchat:
         rooms:
