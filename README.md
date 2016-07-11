@@ -21,7 +21,7 @@ gem 'seed_migration'
 
 ### Install and run the internal migrations
 
-```ruby
+```
 rake seed_migration:install:migrations
 rake db:migrate
 ```
@@ -32,7 +32,7 @@ That will create the table to keep track of data migrations.
 
 You can use the generator :
 
-```ruby
+```
 rails g seed_migration AddFoo
 ```
 A new file will be created under `db/data/` using rails migration convention:
@@ -47,13 +47,13 @@ You'll need to implement the `#up` method and if you need to be able to rollback
 
 To run all pending migrations, simply use
 
-```ruby
+```
 rake seed:migrate
 ```
 
 If needed, you can run a specific migration:
 
-```ruby
+```
 rake seed:migrate MIGRATION=20140407162007_add_foo.rb
 ```
 
@@ -61,20 +61,40 @@ rake seed:migrate MIGRATION=20140407162007_add_foo.rb
 
 Rolling back the last migration is as simple as:
 
-```ruby
+```
 rake seed:rollback
 ```
 
 You can rollback more than one migration at the same time:
 
-```ruby
+```
 rake seed:rollback STEP=3 # rollback last 3 migrations
 ```
 
 Or rollback a specific migration:
 
-```ruby
+```
 rake seed:rollback MIGRATION=20140407162007_add_foo.rb
+```
+
+### Status
+
+See the status of your migrations:
+
+```
+rake seed:migrate:status
+```
+
+Example output:
+
+```
+database: seed-migrationdevelopment
+
+ Status   Migration ID    Migration Name
+--------------------------------------------------
+   up     20160114153832  Add users
+  down    20160114153843  Add more users
+  down    20160114153851  Add even more users
 ```
 
 ### Registering models
@@ -123,6 +143,17 @@ SeedMigration::Migrator.bootstrap(20140404193326)
 ```
 
 Note that `seeds.rb` is only generated in development mode.  Production data will not be dumped in this process.
+
+### Checking for pending migrations
+
+Check for pending data migrations:
+
+```ruby
+SeedMigration::Migrator.check_pending!
+```
+
+If there are pending migrations, this will raise
+`SeedMigration::Migrator::PendingMigrationError`.
 
 ### Adding seed_migrations to an existing app
 
@@ -207,7 +238,7 @@ SeedMigration.register Product
 
 At the moment, we rely by default on
 
-```
+```ruby
 ActiveRecord::Base.connection.reset_pk_sequence!
 ```
 which is `pg` only.
@@ -218,7 +249,7 @@ If you need to use this gem with another database, use the `ignore_ids` configur
 ## Runnings tests
 
 
-```ruby
+```
 RAILS_ENV=test bundle exec rake app:db:reset
 bundle exec rspec spec
 ```

@@ -11,6 +11,10 @@ describe 'Rake Tasks' do
     Rake::Task['seed:rollback'].should_not be_nil
   end
 
+  it 'rake seed:migrate:status' do
+    Rake::Task['seed:migrate:status'].should_not be_nil
+  end
+
   context 'extending rake db:migrate' do
     before(:each) do
       Rake::Task["db:migrate"].clear

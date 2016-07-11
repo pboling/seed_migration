@@ -49,6 +49,18 @@ describe SeedMigration::Migrator do
     end
   end
 
+  describe ".check_pending!" do
+    it "returns nil when no migrations are pending" do
+      SeedMigration::Migrator.run_new_migrations
+      expect(SeedMigration::Migrator.check_pending!).to be_nil
+    end
+
+    it 'raises a PendingMigrationError when migrations are pending' do
+      error = SeedMigration::Migrator::PendingMigrationError
+      expect { SeedMigration::Migrator.check_pending! }.to raise_error(error)
+    end
+  end
+
   describe '.get_new_migrations' do
     before(:each) do
       SeedMigration::Migrator.run_new_migrations
@@ -94,6 +106,31 @@ describe SeedMigration::Migrator do
         SeedMigration::Migrator.any_instance.should_receive(:down).once
         SeedMigration::Migrator.should_receive(:create_seed_file).once
         SeedMigration::Migrator.rollback_migrations('1_foo.rb')
+      end
+    end
+
+    describe "rake migrate:status" do
+      before(:each) do
+        SeedMigration::Migrator.run_new_migrations
+        @files = SeedMigration::Migrator.get_migration_files
+      end
+
+      it "should display the appropriate statuses after a migrate" do
+        output = capture_stdout do
+          SeedMigration::Migrator.display_migrations_status
+        end
+
+        expect(output).to contain(@files.count).occurrences_of(" up ")
+      end
+
+      it "should display the appropriate statuses after a migrate/rollback" do
+        SeedMigration::Migrator.rollback_migrations
+        output = capture_stdout do
+          SeedMigration::Migrator.display_migrations_status
+        end
+
+        expect(output).to contain(@files.count - 1).occurrences_of(" up ")
+        expect(output).to contain(1).occurrences_of(" down ")
       end
     end
   end
@@ -354,7 +391,6 @@ describe SeedMigration::Migrator do
   end
 
   describe ".migrations_path" do
-
     context "with default path" do
       it 'it should create migrations in db/data' do
         SeedMigration::Migrator.get_migration_files.each do |f|
@@ -378,6 +414,5 @@ describe SeedMigration::Migrator do
         end
       end
     end
-
   end
 end
