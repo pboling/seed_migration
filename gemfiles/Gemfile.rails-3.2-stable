@@ -3,6 +3,7 @@ source "https://rubygems.org"
 gemspec path: '..'
 
 gem "rails", '~> 3.2.19'
+gem "rack", "~> 1.4.5"
 
 case ENV['DB']
 when 'postgresql'
