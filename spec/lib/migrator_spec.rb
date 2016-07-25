@@ -137,7 +137,7 @@ describe SeedMigration::Migrator do
 
   describe 'seeds.rb generation' do
     before(:all) do
-      2.times { |i| u = User.new; u.username = i; u.save }
+      2.times { |i| u = User.new; u.username = i; u.a = "'quoted\\'"; u.save }
       2.times { |i| Product.create }
       2.times { |i| UselessModel.create }
     end
@@ -215,12 +215,16 @@ describe SeedMigration::Migrator do
       end
 
       it 'should output all attributes' do
-        contents.should match(/(?=.*User\.create)(?=.*"id"=>)(?=.*"username"=>).*/)
-        contents.should match(/(?=.*Product\.create)(?=.*"id"=>)(?=.*"created_at"=>)(?=.*"updated_at"=>).*/)
+        contents.should match(/(?=.*User\.create)(?=.*'id' => )(?=.*'username' => ).*/)
+        contents.should match(/(?=.*Product\.create)(?=.*'id' => )(?=.*'created_at' => )(?=.*'updated_at' => ).*/)
       end
 
       it 'should output attributes alphabetically ordered' do
-        contents.should match(/(?=.*User\.create)(?=.*"a"=>.*"id"=>.*"username"=>).*/)
+        contents.should match(/(?=.*User\.create)(?=.*'a' => .*'id' => .*'username' => ).*/)
+      end
+
+      it 'should output attributes with escaped single quotes' do
+        contents.should match(/(?=.*User\.create)(?=.*'a' => '\\'quoted\\\\\\'',)/)
       end
 
       context 'with strict_create option' do
@@ -244,7 +248,7 @@ describe SeedMigration::Migrator do
         end
       end
       it 'only outputs selected attributes' do
-        contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
+        contents.should match(/(?=.*User\.create)(?!.*'id' => )(?=.*'username' => ).*/)
       end
 
       context 'ignore_ids option' do
@@ -254,7 +258,7 @@ describe SeedMigration::Migrator do
         end
 
         it "doesn't output ids" do
-          contents.should match(/(?=.*User\.create)(?!.*"id"=>)(?=.*"username"=>).*/)
+          contents.should match(/(?=.*User\.create)(?!.*'id' => )(?=.*'username' => ).*/)
         end
 
         it "doesn't reset the pk sequence" do

@@ -246,8 +246,10 @@ module SeedMigration
 
 ActiveRecord::Base.transaction do
         eos
-        SeedMigration.registrar.each do |register_entry|
-          register_entry.model.order('id').each do |instance|
+        SeedMigration.registrar.each_with_index do |register_entry, register_index|
+          file.write "\n" if register_index > 0
+          register_entry.model.order('id').each_with_index do |instance, instance_index|
+            file.write "\n" if instance_index > 0
             file.write generate_model_creation_string(instance, register_entry)
           end
 
@@ -274,18 +276,30 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       attributes.sort.each do |key, value|
         sorted_attributes[key] = value
       end
+      parsed_attributes = JSON.parse(sorted_attributes.to_json).map do |key, value|
+        quoted_value = case value
+                       when String
+                         "'#{value.gsub('\\', '\\\\\\').gsub("'", "\\\\'")}'"
+                       else
+                         value.inspect
+                       end
+        %('#{key}' => #{quoted_value})
+      end.join(', ')
 
       if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
+        without_protection =
+          if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
+            'without_protection: true'
+          else
+            ':without_protection => true'
+          end
+        model_creation_string = "#{instance.class}.#{create_method}({#{parsed_attributes}}, #{without_protection})"
       elsif Rails::VERSION::MAJOR == 4
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
+        model_creation_string = "#{instance.class}.#{create_method}(#{parsed_attributes})"
       end
 
       # With pretty indents, please.
-      return <<-eos
-
-  #{model_creation_string}
-      eos
+      return "  #{model_creation_string}\n"
     end
 
     def self.create_method
