@@ -277,7 +277,7 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
 
       if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
         model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
-      elsif Rails::VERSION::MAJOR == 4
+      elsif Rails::VERSION::MAJOR == 4 || Rails::VERSION::MAJOR == 5
         model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
       end
 

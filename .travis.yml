@@ -17,6 +17,7 @@ env:
   - THREADSAFE=true DB=postgresql
   - THREADSAFE=false DB=postgresql
 gemfile:
+  - gemfiles/Gemfile.rails-5.0-stable
   - gemfiles/Gemfile.rails-4.2-stable
   - gemfiles/Gemfile.rails-4.1-stable
   - gemfiles/Gemfile.rails-4.0-stable
@@ -24,7 +25,8 @@ gemfile:
   - Gemfile
 matrix:
   allow_failures:
-    - gemfile: Gemfile # Not supporting rails 5 at the moment
+    - rvm: 2.0.0 # Allowed to fail in favor of supporting Rails 5 which requires Ruby 2.2
+    - rvm: 2.1.0
 notifications:
     hipchat:
         rooms:
