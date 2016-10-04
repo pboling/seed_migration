@@ -20,7 +20,7 @@ module SeedMigration
     def up
       # Check if we already migrated this file
       klass = class_from_path
-      version = @path.basename.to_s.split("_", 2).first
+      version, _ = self.class.parse_migration_filename(@path)
       raise "#{klass} has already been migrated." if SeedMigration::DataMigration.where(version: version).first
 
       start_time = Time.now
@@ -129,9 +129,8 @@ module SeedMigration
       p "Assume seed data migrated up to #{last_timestamp}"
       files = get_migration_files(last_timestamp.to_s)
       files.each do |file|
-        _, version = parse_migration_filename(file)
         migration = SeedMigration::DataMigration.new
-        migration.version = version
+        migration.version, _ = parse_migration_filename(file)
         migration.runtime = 0
         migration.migrated_on = DateTime.now
         migration.save!
