@@ -72,6 +72,19 @@ describe SeedMigration::Migrator do
     end
   end
 
+  describe '.bootstrap' do
+    let(:timestamp) { 5.days.ago.utc.strftime("%Y%m%d%H%M%S") }
+    before(:each) do
+      FileUtils.rm(SeedMigration::Migrator.get_migration_files)
+      Rails::Generators.invoke("seed_migration", ["TestMigrationBefore", timestamp])
+    end
+
+    it 'runs all migrations' do
+      expect{SeedMigration::Migrator.bootstrap}.to change{SeedMigration::DataMigration.count}.by(1)
+      expect(SeedMigration::DataMigration.first.version).to eq(timestamp)
+    end
+  end
+
   describe "rake tasks" do
     describe "rake migrate" do
       it "should run migrations and insert a record into the data_migrations table" do
