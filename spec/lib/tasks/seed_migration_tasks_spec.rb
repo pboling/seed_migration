@@ -25,7 +25,7 @@ describe 'Rake Tasks' do
       let(:extend_native_migration_task) { false }
 
       it 'should not extend rake db:migrate' do
-        SeedMigration.extend_native_migration_task.should be_false
+        SeedMigration.extend_native_migration_task.should eq(false)
         Rake::Task['seed:migrate'].should_not_receive(:invoke)
         Rake::Task["db:migrate"].execute
       end
@@ -34,7 +34,7 @@ describe 'Rake Tasks' do
       let(:extend_native_migration_task) { true }
 
       it 'should extend rake db:migrate' do
-        SeedMigration.extend_native_migration_task.should be_true
+        SeedMigration.extend_native_migration_task.should eq(true)
         Rake::Task['seed:migrate'].should_receive(:invoke)
         Rake::Task["db:migrate"].execute
       end

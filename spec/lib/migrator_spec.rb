@@ -192,7 +192,7 @@ describe SeedMigration::Migrator do
         end
 
         it 'should not creates seeds.rb file' do
-          File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should be_false
+          File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should eq(false)
         end
       end
 
@@ -212,7 +212,7 @@ describe SeedMigration::Migrator do
       end
 
       it 'creates seeds.rb file' do
-        File.exists?(File.join(Rails.root, 'db', 'seeds.rb')).should be_true
+        File.exists?(File.join(Rails.root, 'db', 'seeds.rb')).should eq(true)
       end
 
       it 'outputs models creation in seeds.rb file' do
@@ -294,7 +294,7 @@ describe SeedMigration::Migrator do
         SeedMigration::Migrator.run_new_migrations
       end
       it "doesn't generate seed file" do
-        File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should be_false
+        File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH).should eq(false)
       end
     end
   end
@@ -320,7 +320,7 @@ describe SeedMigration::Migrator do
     end
 
     it 'creates seeds.rb file' do
-      File.exists?(File.join(Rails.root, 'db', 'seeds.rb')).should be_true
+      File.exists?(File.join(Rails.root, 'db', 'seeds.rb')).should eq(true)
     end
 
     it 'evaluates without throwing any errors' do
