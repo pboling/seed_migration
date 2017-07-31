@@ -1,4 +1,4 @@
-class CreateDataMigrations < ActiveRecord::Migration
+class CreateDataMigrations < ActiveRecord::Migration[4.2]
   def up
     create_table SeedMigration.migration_table_name do |t|
       t.string :version
