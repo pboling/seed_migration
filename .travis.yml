@@ -7,7 +7,7 @@ rvm:
   - 2.2.2
 script:
   - export RAILS_ENV=test
-  - bundle exec rake app:db:create app:db:migrate
+  - bundle exec rake app:db:create app:db:setup
   - bundle exec rspec spec && bundle exec codeclimate-test-reporter
 env:
   - THREADSAFE=true DB=mysql
