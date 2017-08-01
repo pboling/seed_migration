@@ -10,12 +10,9 @@ script:
   - bundle exec rake app:db:create app:db:setup
   - bundle exec rspec spec && bundle exec codeclimate-test-reporter
 env:
-  - THREADSAFE=true DB=mysql
-  - THREADSAFE=false DB=mysql
-  - THREADSAFE=true DB=sqlite
-  - THREADSAFE=false DB=sqlite
-  - THREADSAFE=true DB=postgresql
-  - THREADSAFE=false DB=postgresql
+  - DB=mysql
+  - DB=sqlite
+  - DB=postgresql
 gemfile:
   - gemfiles/Gemfile.rails-5.1-stable
   - gemfiles/Gemfile.rails-5.0-stable
@@ -27,6 +24,13 @@ gemfile:
 matrix:
   allow_failures:
     - rvm: 2.2.7 # 2.2 is in security maintenace phase: https://www.ruby-lang.org/en/news/2017/04/01/support-of-ruby-2-1-has-ended/
+  include:
+    - env: THREADSAFE=true DB=mysql
+      gemfile: gemfiles/Gemfile.rails-3.2-stable
+    - env: THREADSAFE=true DB=postgresql
+      gemfile: gemfiles/Gemfile.rails-3.2-stable
+    - env: THREADSAFE=true DB=sqlite3
+      gemfile: gemfiles/Gemfile.rails-3.2-stable
 notifications:
     hipchat:
         rooms:
