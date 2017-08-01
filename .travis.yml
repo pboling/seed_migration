@@ -24,6 +24,12 @@ gemfile:
 matrix:
   allow_failures:
     - rvm: 2.2.7 # 2.2 is in security maintenace phase: https://www.ruby-lang.org/en/news/2017/04/01/support-of-ruby-2-1-has-ended/
+    - rvm: 2.4.1 # These 3 rails version don't seem to play well with ruby 2.4
+      gemfile: gemfiles/Gemfile.rails-3.2-stable
+    - rvm: 2.4.1
+      gemfile: gemfiles/Gemfile.rails-4.1-stable
+    - rvm: 2.4.1
+      gemfile: gemfiles/Gemfile.rails-4.0-stable
   include:
     - env: THREADSAFE=true DB=mysql
       gemfile: gemfiles/Gemfile.rails-3.2-stable
