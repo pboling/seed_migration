@@ -37,7 +37,7 @@ matrix:
     - env: THREADSAFE=true DB=postgresql
       gemfile: gemfiles/Gemfile.rails-3.2-stable
       rvm: 2.3.4
-    - env: THREADSAFE=true DB=sqlite3
+    - env: THREADSAFE=true DB=sqlite
       gemfile: gemfiles/Gemfile.rails-3.2-stable
       rvm: 2.3.4
 notifications:
