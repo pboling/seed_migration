@@ -2,9 +2,9 @@ sudo: false
 language: ruby
 cache: bundler
 rvm:
-  - 2.0.0
-  - 2.1.0
-  - 2.2.2
+  - 2.2.7
+  - 2.3.4
+  - 2.4.1
 script:
   - export RAILS_ENV=test
   - bundle exec rake app:db:create app:db:setup
@@ -26,8 +26,7 @@ gemfile:
   - Gemfile
 matrix:
   allow_failures:
-    - rvm: 2.0.0 # Allowed to fail in favor of supporting Rails 5 which requires Ruby 2.2
-    - rvm: 2.1.0
+    - rvm: 2.2.7 # 2.2 is in security maintenace phase: https://www.ruby-lang.org/en/news/2017/04/01/support-of-ruby-2-1-has-ended/
 notifications:
     hipchat:
         rooms:
