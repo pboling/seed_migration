@@ -27,10 +27,13 @@ matrix:
   include:
     - env: THREADSAFE=true DB=mysql
       gemfile: gemfiles/Gemfile.rails-3.2-stable
+      rvm: 2.4.1
     - env: THREADSAFE=true DB=postgresql
       gemfile: gemfiles/Gemfile.rails-3.2-stable
+      rvm: 2.4.1
     - env: THREADSAFE=true DB=sqlite3
       gemfile: gemfiles/Gemfile.rails-3.2-stable
+      rvm: 2.4.1
 notifications:
     hipchat:
         rooms:
