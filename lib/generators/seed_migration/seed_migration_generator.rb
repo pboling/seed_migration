@@ -19,13 +19,13 @@ module SeedMigration
       def contents
         <<STRING
 class #{file_name.camelize} < SeedMigration::Migration
-  def up
+\tdef up
 
-  end
+\tend
 
-  def down
+\tdef down
 
-  end
+\tend
 end
 STRING
       end
