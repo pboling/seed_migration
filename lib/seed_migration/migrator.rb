@@ -1,3 +1,4 @@
+require 'logger'
 require 'pathname'
 
 module SeedMigration
@@ -38,7 +39,7 @@ module SeedMigration
         begin
           migration.save!
         rescue StandardError => e
-          puts e
+          SeedMigration::Migrator.logger.error e
         end
         announce("#{klass}: migrated (#{runtime}s)")
       end
@@ -112,21 +113,20 @@ module SeedMigration
     end
 
     def self.display_migrations_status
-      puts "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
-      puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
-      puts "-" * 50
+      logger.info "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
+      logger.info "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
+      logger.info "-" * 50
 
       up_versions = get_all_migration_versions
       get_migration_files.each do |file|
         version, name = parse_migration_filename(file)
         status = up_versions.include?(version) ? "up" : "down"
-        puts "#{status.center(8)}  #{version.ljust(14)}  #{name}"
+        logger.info "#{status.center(8)}  #{version.ljust(14)}  #{name}"
       end
     end
 
     def self.bootstrap(last_timestamp = nil)
-      # replace with logger ?
-      p "Assume seed data migrated up to #{last_timestamp}"
+      logger.info "Assume seed data migrated up to #{last_timestamp}"
       files = get_migration_files(last_timestamp.to_s)
       files.each do |file|
         migration = SeedMigration::DataMigration.new
@@ -135,6 +135,15 @@ module SeedMigration
         migration.migrated_on = DateTime.now
         migration.save!
       end
+    end
+
+    def self.logger
+      set_logger if @logger.nil?
+      @logger
+    end
+
+    def self.set_logger(new_logger = Logger.new($stdout))
+      @logger = new_logger
     end
 
     private
@@ -150,7 +159,7 @@ module SeedMigration
 
     def announce(text)
       length = [0, 75 - text.length].max
-      puts "== %s %s" % [text, "=" * length]
+      SeedMigration::Migrator.logger.info "== %s %s" % [text, "=" * length]
     end
 
     def self.get_new_migrations

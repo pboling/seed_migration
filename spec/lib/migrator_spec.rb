@@ -130,6 +130,7 @@ describe SeedMigration::Migrator do
 
       it "should display the appropriate statuses after a migrate" do
         output = capture_stdout do
+          SeedMigration::Migrator.set_logger(Logger.new($stdout))
           SeedMigration::Migrator.display_migrations_status
         end
 
@@ -139,6 +140,7 @@ describe SeedMigration::Migrator do
       it "should display the appropriate statuses after a migrate/rollback" do
         SeedMigration::Migrator.rollback_migrations
         output = capture_stdout do
+          SeedMigration::Migrator.set_logger(Logger.new($stdout))
           SeedMigration::Migrator.display_migrations_status
         end
 
