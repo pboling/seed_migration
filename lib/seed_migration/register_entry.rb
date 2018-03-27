@@ -1,7 +1,10 @@
 module SeedMigration
   class RegisterEntry
+    DEFAULT_ORDER = 'id'
+
     attr_reader :model
     attr_accessor :attributes
+    attr_accessor :ordering
 
     def initialize(model)
       @model = model
@@ -12,12 +15,16 @@ module SeedMigration
       attrs.map(&:to_s).each { |attr| exclude_single_attributes attr }
     end
 
-    def eql?(object)
-      object.class == self.class && object.model == self.model
+    def eql?(other)
+      other.class == self.class && other.model == self.model
     end
 
     def hash
       model.hash
+    end
+
+    def order(order=DEFAULT_ORDER)
+      @order ||= order
     end
 
     private

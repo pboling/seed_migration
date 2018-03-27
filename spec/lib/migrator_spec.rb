@@ -209,7 +209,9 @@ describe SeedMigration::Migrator do
       before(:all) do
         SeedMigration.ignore_ids = false
         SeedMigration.update_seeds_file = true
-        SeedMigration.register User
+        SeedMigration.register User do
+          order :username
+        end
         SeedMigration.register Product
       end
 
