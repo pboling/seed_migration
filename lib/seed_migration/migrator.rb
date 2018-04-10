@@ -158,6 +158,7 @@ module SeedMigration
     end
 
     def announce(text)
+      return unless ENV['SILENT_MIGRATION'].nil?
       length = [0, 75 - text.length].max
       SeedMigration::Migrator.logger.info "== %s %s" % [text, "=" * length]
     end
