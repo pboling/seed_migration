@@ -254,9 +254,20 @@ module SeedMigration
 
 ActiveRecord::Base.transaction do
         eos
+
         SeedMigration.registrar.each do |register_entry|
+          if SeedMigration.use_activerecord_import?
+            file.write <<-eos
+  #{register_entry.model}.import([
+            eos
+          end
           register_entry.model.order('id').each do |instance|
             file.write generate_model_creation_string(instance, register_entry)
+          end
+          if SeedMigration.use_activerecord_import?
+            file.write <<-eos
+  ], validate: false)
+            eos
           end
 
           if !SeedMigration.ignore_ids
@@ -283,7 +294,9 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
         sorted_attributes[key] = value
       end
 
-      if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
+      if SeedMigration.use_activerecord_import?
+        model_creation_string = "  #{JSON.parse(sorted_attributes.to_json)},"
+      elsif Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
         model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
       elsif Rails::VERSION::MAJOR == 4 || Rails::VERSION::MAJOR == 5
         model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
