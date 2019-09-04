@@ -3,6 +3,13 @@ require 'spec_helper'
 describe SeedMigration::RegisterEntry do
   let(:entry) { SeedMigration::RegisterEntry.new(User) }
 
+  describe '#model' do
+    it 'builds from model name' do
+      entry = SeedMigration::RegisterEntry.new('User')
+      expect(entry.model).to eq User
+    end
+  end
+
   describe '#attributes' do
     it 'exists' do
       entry.attributes.should be_a_kind_of Array
