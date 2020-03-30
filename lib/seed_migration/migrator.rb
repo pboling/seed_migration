@@ -256,17 +256,17 @@ ActiveRecord::Base.transaction do
         eos
 
         SeedMigration.registrar.each do |register_entry|
-          if SeedMigration.use_activerecord_import?
+          if SeedMigration.use_activerecord_bulk_insert?
             file.write <<-eos
-  #{register_entry.model}.import([
+  #{register_entry.model}.#{insert_all_method}([
             eos
           end
           register_entry.model.order('id').each do |instance|
             file.write generate_model_creation_string(instance, register_entry)
           end
-          if SeedMigration.use_activerecord_import?
+          if SeedMigration.use_activerecord_bulk_insert?
             file.write <<-eos
-  ], validate: false)
+  ])
             eos
           end
 
@@ -294,8 +294,12 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
         sorted_attributes[key] = value
       end
 
-      if SeedMigration.use_activerecord_import?
+      if SeedMigration.use_activerecord_bulk_insert?
         model_creation_string = "  #{JSON.parse(sorted_attributes.to_json)},"
+        timestamps = (Set.new(['created_at', 'updated_at']) & Set.new(register_entry.model.attribute_names) & Set.new(register_entry.excluded_attributes))
+        if timestamps.present?
+          model_creation_string.sub!(/\},/, ", #{timestamps.map{|t| "#{t.inspect} => Time.current"}.join(", ")}},")
+        end
       elsif Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
         model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
       elsif [4, 5, 6].include?(Rails::VERSION::MAJOR)
@@ -309,6 +313,9 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
       eos
     end
 
+    def self.insert_all_method
+      SeedMigration.use_strict_create? ? 'insert_all!' : 'insert_all'
+    end
     def self.create_method
       SeedMigration.use_strict_create? ? 'create!' : 'create'
     end

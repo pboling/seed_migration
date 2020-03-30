@@ -1,6 +1,6 @@
 module SeedMigration
   class RegisterEntry
-    attr_reader :model_name
+    attr_reader :model_name, :excluded_attributes
 
     def initialize(model)
       @model_name = model.to_s

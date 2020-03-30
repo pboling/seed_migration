@@ -10,7 +10,7 @@ module SeedMigration
   mattr_accessor :update_seeds_file
   mattr_accessor :migrations_path
   mattr_accessor :use_strict_create
-  mattr_accessor :use_activerecord_import
+  mattr_accessor :use_activerecord_bulk_insert
 
   self.migration_table_name = DEFAULT_TABLE_NAME
   self.extend_native_migration_task = false
@@ -18,7 +18,7 @@ module SeedMigration
   self.update_seeds_file = true
   self.migrations_path = 'data'
   self.use_strict_create = false
-  self.use_activerecord_import = false
+  self.use_activerecord_bulk_insert = false
 
   def self.config
     yield self
@@ -35,8 +35,8 @@ module SeedMigration
     use_strict_create
   end
 
-  def self.use_activerecord_import?
-    use_activerecord_import
+  def self.use_activerecord_bulk_insert?
+    use_activerecord_bulk_insert
   end
 
   class Engine < ::Rails::Engine
