@@ -69,13 +69,23 @@ module SeedMigration
       start_time = Time.now
       announce("#{klass}: reverting")
       ActiveRecord::Base.transaction do
-        klass.new.down
+        if should_apply_in_this_environment?(klass, version)
+          klass.new.down
+        else
+          announce("#{klass} has not been previously applied in this environment, #{klass} required environments: #{default_and_seed_environments(klass)}, current environment: #{SeedMigration.environments_rails_value}")
+        end
+
         end_time = Time.now
         runtime = (end_time - start_time).to_d.round(2)
 
         # Delete record of migration
         migration.destroy
-        announce("#{klass}: reverted (#{runtime}s)")
+
+        if should_apply_in_this_environment?(klass, version)
+          announce("#{klass}: reverted (#{runtime}s)")
+        else
+          announce("#{klass}: version reverted just for rollback consistency (#{runtime}s)")
+        end
       end
     end
 
@@ -103,7 +113,8 @@ module SeedMigration
       if SeedMigration.environments_required?
         if seed_version_requires_environment?(version) && klass.environment_names_array.blank?
           msg = [
-            "Missing environments declaration for: #{@path}",
+            "\n",
+            "Missing prod environments declaration for: #{@path}",
             "\nPlease add it like:",
             <<~SEED
 
