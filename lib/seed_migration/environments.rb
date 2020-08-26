@@ -12,7 +12,7 @@ module Environments
   module ClassMethods
     attr_reader :environment_names_array
 
-    # Difine environments to apply the seed migration
+    # Define environments to apply the seed migration
     #
     # class MyMigration < SeedMigration::Migration
     #
