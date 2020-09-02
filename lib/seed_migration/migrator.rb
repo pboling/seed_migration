@@ -23,11 +23,17 @@ module SeedMigration
       klass = class_from_path
       version, _ = self.class.parse_migration_filename(@path)
       raise "#{klass} has already been migrated." if SeedMigration::DataMigration.where(version: version).first
+      raise_if_missing_required_environments(klass, version)
 
       start_time = Time.now
       announce("#{klass}: migrating")
       ActiveRecord::Base.transaction do
-        klass.new.up
+        if should_apply_in_this_environment?(klass, version)
+          klass.new.up
+        else
+          announce("#{klass} not applied in this environment, #{klass} required environments: #{default_and_seed_environments(klass)}, current environment: #{SeedMigration.environments_rails_value}")
+        end
+
         end_time = Time.now
         runtime = (end_time - start_time).to_d.round(2)
 
@@ -41,7 +47,11 @@ module SeedMigration
         rescue StandardError => e
           SeedMigration::Migrator.logger.error e
         end
-        announce("#{klass}: migrated (#{runtime}s)")
+        if should_apply_in_this_environment?(klass, version)
+          announce("#{klass}: migrated (#{runtime}s)")
+        else
+          announce("#{klass}: version recorded to #{SeedMigration.migration_table_name} table just for rollback consistency (#{runtime}s)")
+        end
       end
     end
 
@@ -59,13 +69,72 @@ module SeedMigration
       start_time = Time.now
       announce("#{klass}: reverting")
       ActiveRecord::Base.transaction do
-        klass.new.down
+        if should_apply_in_this_environment?(klass, version)
+          klass.new.down
+        else
+          announce("#{klass} has not been previously applied in this environment, #{klass} required environments: #{default_and_seed_environments(klass)}, current environment: #{SeedMigration.environments_rails_value}")
+        end
+
         end_time = Time.now
         runtime = (end_time - start_time).to_d.round(2)
 
         # Delete record of migration
         migration.destroy
-        announce("#{klass}: reverted (#{runtime}s)")
+
+        if should_apply_in_this_environment?(klass, version)
+          announce("#{klass}: reverted (#{runtime}s)")
+        else
+          announce("#{klass}: version reverted just for rollback consistency (#{runtime}s)")
+        end
+      end
+    end
+
+    def should_apply_in_this_environment?(klass, version)
+      @should_apply_in_this_environment ||=
+        (!SeedMigration.environments_required? || !seed_version_requires_environment?(version) || default_and_seed_environments(klass).map(&:to_s).include?(SeedMigration.environments_rails_value))
+    end
+
+    def default_and_seed_environments(klass)
+      return @default_and_seed_environments if @default_and_seed_environments
+
+      if [nil, Array].exclude?(SeedMigration.environments_defaults.class)
+        raise 'SeedMigration.environments invalid, it should be an array'
+      end
+
+      @default_and_seed_environments ||= (SeedMigration.environments_defaults | klass.environment_names_array).map(&:to_s)
+    end
+
+    def seed_version_requires_environment?(version)
+      seed_version_requires_environment = !SeedMigration.environments_version_bootstrap ||
+          (SeedMigration.environments_version_bootstrap && SeedMigration.environments_version_bootstrap < version)
+    end
+
+    def raise_if_missing_required_environments(klass, version)
+      if SeedMigration.environments_required?
+        if seed_version_requires_environment?(version) && klass.environment_names_array.blank?
+          msg = [
+            "\n",
+            "Missing prod environments declaration for: #{@path}",
+            "\nPlease add it like:",
+            <<~SEED
+
+              class MySeedMigration < SeedMigration::Migration
+
+                # in this example, it will apply it on both production and adac_production envs
+                environments :production, :adac_production
+
+                def up
+                end
+
+                def down
+                end
+
+              end
+
+            SEED
+          ].join("\n")
+          raise msg
+        end
       end
     end
 
@@ -231,7 +300,7 @@ module SeedMigration
       basename = File.basename(filename, '.rb')
       _, version, underscored_name = basename.match(/(\d+)_(.*)/).to_a
       name = underscored_name.gsub("_", " ").capitalize
-      [version, name]
+      [version, name, basename]
     end
 
     def self.create_seed_file

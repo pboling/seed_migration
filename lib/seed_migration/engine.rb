@@ -4,6 +4,14 @@ module SeedMigration
 
   DEFAULT_TABLE_NAME = 'seed_migration_data_migrations'
 
+  # Default environments list set, defaults to []
+  mattr_accessor :environments_defaults
+  # set the current enviroment rails value, defaults to Rails.env
+  mattr_accessor :environments_rails_value
+  # set if the environments method should explicitly be called in the seeds, defaults to false
+  mattr_accessor :environments_required
+  # set the seed version from where the environments check should start, defaults to nil (which will check it from the first seed file)
+  mattr_accessor :environments_version_bootstrap
   mattr_accessor :extend_native_migration_task
   mattr_accessor :migration_table_name
   mattr_accessor :ignore_ids
@@ -12,6 +20,10 @@ module SeedMigration
   mattr_accessor :use_strict_create
   mattr_accessor :use_activerecord_bulk_insert
 
+  self.environments_defaults = []
+  self.environments_rails_value = Rails.env
+  self.environments_required = false
+  self.environments_version_bootstrap = nil
   self.migration_table_name = DEFAULT_TABLE_NAME
   self.extend_native_migration_task = false
   self.ignore_ids = false
@@ -37,6 +49,10 @@ module SeedMigration
 
   def self.use_activerecord_bulk_insert?
     use_activerecord_bulk_insert
+  end
+
+  def self.environments_required?
+    environments_required
   end
 
   class Engine < ::Rails::Engine
