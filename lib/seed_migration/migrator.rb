@@ -27,7 +27,7 @@ module SeedMigration
 
       start_time = Time.now
       announce("#{klass}: migrating")
-      ActiveRecord::Base.transaction do
+      transaction(klass) do
         if should_apply_in_this_environment?(klass, version)
           klass.new.up
         else
@@ -68,7 +68,7 @@ module SeedMigration
       # Revert
       start_time = Time.now
       announce("#{klass}: reverting")
-      ActiveRecord::Base.transaction do
+      transaction(klass) do
         if should_apply_in_this_environment?(klass, version)
           klass.new.down
         else
@@ -85,6 +85,16 @@ module SeedMigration
           announce("#{klass}: reverted (#{runtime}s)")
         else
           announce("#{klass}: version reverted just for rollback consistency (#{runtime}s)")
+        end
+      end
+    end
+
+    def transaction(klass)
+      if klass.disable_ddl_transaction
+        yield
+      else
+        ActiveRecord::Base.transaction do
+          yield
         end
       end
     end

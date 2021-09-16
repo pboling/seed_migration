@@ -207,6 +207,25 @@ class AddADummyProduct < SeedMigration::Migration
 end
 ```
 
+## Disable Transactions
+
+Support has been added for disabling transactions for long running migrations.
+
+```ruby
+class ChangeABunchOfJobs < SeedMigration::Migration
+
+  disable_ddl_transaction!
+
+  def up
+    Job.all.in_batches.update_all(awesome: true)
+  end
+
+  def down
+  end
+
+end
+```
+
 ## Configuration
 
 Use an initializer file for configuration.
