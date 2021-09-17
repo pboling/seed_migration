@@ -10,7 +10,7 @@ module SeedMigration
       attr_accessor :disable_transaction
       # Disable the transaction wrapping this migration.
       # You can still create your own transactions even after
-      # calling #disable_ddl_transaction!
+      # calling #disable_transaction!
       def disable_transaction!
         @disable_transaction = true
       end
