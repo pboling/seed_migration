@@ -7,17 +7,17 @@ module SeedMigration
     include Environments
 
     class << self
-      attr_accessor :disable_ddl_transaction
+      attr_accessor :disable_transaction
       # Disable the transaction wrapping this migration.
       # You can still create your own transactions even after
       # calling #disable_ddl_transaction!
-      def disable_ddl_transaction!
-        @disable_ddl_transaction = true
+      def disable_transaction!
+        @disable_transaction = true
       end
     end
 
-    def disable_ddl_transaction
-      self.class.disable_ddl_transaction
+    def disable_transaction
+      self.class.disable_transaction
     end
 
     def up

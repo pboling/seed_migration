@@ -214,7 +214,7 @@ Support has been added for disabling transactions for long running migrations.
 ```ruby
 class ChangeABunchOfJobs < SeedMigration::Migration
 
-  disable_ddl_transaction!
+  disable_transaction!
 
   def up
     Job.all.in_batches.update_all(awesome: true)

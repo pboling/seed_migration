@@ -90,7 +90,7 @@ module SeedMigration
     end
 
     def transaction(klass)
-      if klass.disable_ddl_transaction
+      if klass.disable_transaction
         yield
       else
         ActiveRecord::Base.transaction do
