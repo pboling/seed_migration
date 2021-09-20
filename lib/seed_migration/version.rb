@@ -1,3 +1,3 @@
 module SeedMigration
-  VERSION = "1.2.4-swoop-enhancements"
+  VERSION = "1.2.5-swoop-enhancements"
 end
