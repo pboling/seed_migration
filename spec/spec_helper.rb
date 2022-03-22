@@ -1,10 +1,10 @@
-require 'simplecov'
+require "simplecov"
 SimpleCov.start
 
 ENV["RAILS_ENV"] = "test"
 
 require "stringio"
-require File.expand_path("../dummy/config/environment.rb",  __FILE__)
+require File.expand_path("../dummy/config/environment.rb", __FILE__)
 require "rspec/rails"
 require "rspec/expectations"
 require "rails/generators"
@@ -12,7 +12,7 @@ require "rails/generators"
 Rails.backtrace_cleaner.remove_silencers!
 
 # Load support files
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
 
 # Load fixtures from the engine
 if ActiveSupport::TestCase.method_defined?(:fixture_path=)
@@ -33,7 +33,7 @@ RSpec::Matchers.define :contain do |count|
     "contain #{count} occurrences of #{@substr}"
   end
 
-  failure_message_for_should do |actual|
+  failure_message do |actual|
     "expected that '#{actual}' would contain #{count} occurrences of '#{@substr}'"
   end
 end
@@ -58,7 +58,7 @@ end
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
-  config.treat_symbols_as_metadata_keys_with_true_values = true
+  # config.treat_symbols_as_metadata_keys_with_true_values = true
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
   config.include Helpers
@@ -67,9 +67,9 @@ RSpec.configure do |config|
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
   #     --seed 1234
-  config.order = 'random'
+  config.order = "random"
   config.after(:all) do
-    if File.exists?(SeedMigration::Migrator::SEEDS_FILE_PATH)
+    if File.exist?(SeedMigration::Migrator::SEEDS_FILE_PATH)
       File.delete(SeedMigration::Migrator::SEEDS_FILE_PATH)
     end
   end
