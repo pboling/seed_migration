@@ -288,7 +288,7 @@ module SeedMigration
 
         if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
           model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
-        elsif Rails::VERSION::MAJOR == 4 || Rails::VERSION::MAJOR == 5
+        else
           model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
         end
 
