@@ -12,8 +12,8 @@ module SeedMigration
       attrs.map(&:to_s).each { |attr| exclude_single_attributes attr }
     end
 
-    def eql?(object)
-      object.class == self.class && object.model == self.model
+    def eql?(other)
+      other.class == self.class && other.model == model
     end
 
     def hash

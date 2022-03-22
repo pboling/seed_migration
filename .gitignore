@@ -13,3 +13,5 @@ pkg
 log
 *.sqlite3
 seeds.rb
+coverage
+spec/dummy/tmp

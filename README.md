@@ -1,11 +1,9 @@
-[![Build Status](https://travis-ci.org/harrystech/seed_migration.svg?branch=master)](https://travis-ci.org/harrystech/seed_migration) [![Gem Version](https://badge.fury.io/rb/seed_migration.svg)](http://badge.fury.io/rb/seed_migration) [![Code Climate](https://codeclimate.com/repos/565d2ab865f101004800136a/badges/22e9c1da0befd44cac82/gpa.svg)](https://codeclimate.com/repos/565d2ab865f101004800136a/feed) [![Test Coverage](https://codeclimate.com/repos/565d2ab865f101004800136a/badges/22e9c1da0befd44cac82/coverage.svg)](https://codeclimate.com/repos/565d2ab865f101004800136a/coverage)
-
 # SeedMigration
 
 Harry's Data Migrations are a way to manage changes to seed data in a rails app in a similar way to how schema migrations are handled.
 
-
 ## Intro
+
 A data migration library, similar to rails built-in schema migration. It also auto generates a `db/seeds.rb` file, similar to how schema migrations generate the `db/schema.rb` file.
 Using this auto generated seed file makes it quick and easy to setup new environments, usually development or test.
 

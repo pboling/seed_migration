@@ -1,8 +1,7 @@
-require 'rails'
+require "rails"
 
 module SeedMigration
-
-  DEFAULT_TABLE_NAME = 'seed_migration_data_migrations'
+  DEFAULT_TABLE_NAME = "seed_migration_data_migrations"
 
   mattr_accessor :extend_native_migration_task
   mattr_accessor :migration_table_name
@@ -15,7 +14,7 @@ module SeedMigration
   self.extend_native_migration_task = false
   self.ignore_ids = false
   self.update_seeds_file = true
-  self.migrations_path = 'data'
+  self.migrations_path = "data"
   self.use_strict_create = false
 
   def self.config
@@ -24,8 +23,8 @@ module SeedMigration
   end
 
   def self.after_config
-    if self.extend_native_migration_task
-      require_relative '../extra_tasks.rb'
+    if extend_native_migration_task
+      require_relative "../extra_tasks"
     end
   end
 
@@ -37,11 +36,10 @@ module SeedMigration
     isolate_namespace SeedMigration
 
     config.generators do |g|
-      g.test_framework :rspec, :fixture => false
-      g.fixture_replacement :factory_girl, :dir => 'spec/factories'
+      g.test_framework :rspec, fixture: false
+      g.fixture_replacement :factory_bot, dir: "spec/factories"
       g.assets false
       g.helper false
     end
-
   end
 end

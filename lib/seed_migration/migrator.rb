@@ -1,9 +1,9 @@
-require 'logger'
-require 'pathname'
+require "logger"
+require "pathname"
 
 module SeedMigration
   class Migrator
-    SEEDS_FILE_PATH = Rails.root.join('db', 'seeds.rb')
+    SEEDS_FILE_PATH = Rails.root.join("db", "seeds.rb")
 
     def self.data_migration_directory
       Rails.root.join("db", SeedMigration.migrations_path)
@@ -38,7 +38,7 @@ module SeedMigration
         migration.migrated_on = DateTime.now
         begin
           migration.save!
-        rescue StandardError => e
+        rescue => e
           SeedMigration::Migrator.logger.error e
         end
         announce("#{klass}: migrated (#{runtime}s)")
@@ -89,14 +89,14 @@ module SeedMigration
         # Run any outstanding migrations
         run_new_migrations
       else
-        path = self.migration_path(filename)
+        path = migration_path(filename)
         new(path).up
       end
       create_seed_file
     end
 
     def self.last_migration
-      return SeedMigration::DataMigration.maximum("version")
+      SeedMigration::DataMigration.maximum("version")
     end
 
     def self.rollback_migrations(filename = nil, steps = 1)
@@ -113,8 +113,8 @@ module SeedMigration
     end
 
     def self.display_migrations_status
-      logger.info "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
-      logger.info "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
+      logger.info "\ndatabase: #{ActiveRecord::Base.connection_db_config.database}\n\n"
+      logger.info "#{"Status".center(8)}  #{"Migration ID".ljust(14)}  Migration Name"
       logger.info "-" * 50
 
       up_versions = get_all_migration_versions
@@ -158,148 +158,150 @@ module SeedMigration
     end
 
     def announce(text)
-      return if ENV['SILENT_MIGRATION']
+      return if ENV["SILENT_MIGRATION"]
 
       length = [0, 75 - text.length].max
       SeedMigration::Migrator.logger.info "== %s %s" % [text, "=" * length]
     end
 
-    def self.get_new_migrations
-      migrations = []
-      files = get_migration_files
+    class << self
+      def get_new_migrations
+        migrations = []
+        files = get_migration_files
 
-      # If there is no last migration, all migrations are new
-      if get_last_migration_date.nil?
-        return files
-      end
-
-      all_migration_versions = get_all_migration_versions
-
-      files.each do |file|
-        filename = file.split('/').last
-        version = filename.split('_').first
-        if !all_migration_versions.include?(version)
-          migrations << filename
+        # If there is no last migration, all migrations are new
+        if get_last_migration_date.nil?
+          return files
         end
-      end
 
-      # Sort the files so they execute in order
-      migrations.sort!
+        all_migration_versions = get_all_migration_versions
 
-      return migrations
-    end
-
-    def self.get_last_x_migrations(x = 1)
-      # Grab data from DB
-      migrations = SeedMigration::DataMigration.order("version DESC").limit(x).pluck("version")
-
-      # Get actual files to load
-      to_rollback = []
-      files = get_migration_files
-      migrations.each do |migration|
         files.each do |file|
-          if !file.split('/').last[migration].nil?
-            to_rollback << file
+          filename = file.split("/").last
+          version = filename.split("_").first
+          if !all_migration_versions.include?(version)
+            migrations << filename
           end
+        end
+
+        # Sort the files so they execute in order
+        migrations.sort!
+
+        migrations
+      end
+
+      def get_last_x_migrations(x = 1)
+        # Grab data from DB
+        migrations = SeedMigration::DataMigration.order("version DESC").limit(x).pluck("version")
+
+        # Get actual files to load
+        to_rollback = []
+        files = get_migration_files
+        migrations.each do |migration|
+          files.each do |file|
+            if !file.split("/").last[migration].nil?
+              to_rollback << file
+            end
+          end
+        end
+
+        to_rollback
+      end
+
+      def get_last_migration_date
+        return nil if SeedMigration::DataMigration.count == 0
+        DateTime.parse(last_migration)
+      end
+
+      def get_migration_files(last_timestamp = nil)
+        files = Dir.glob(migration_path("*_*.rb"))
+        if last_timestamp.present?
+          files.delete_if do |file|
+            timestamp = File.basename(file).split("_").first
+            timestamp > last_timestamp
+          end
+        end
+
+        # Just in case
+        files.sort!
+      end
+
+      def get_all_migration_versions
+        SeedMigration::DataMigration.all.map(&:version)
+      end
+
+      def parse_migration_filename(filename)
+        basename = File.basename(filename, ".rb")
+        _, version, underscored_name = basename.match(/(\d+)_(.*)/).to_a
+        name = underscored_name.tr("_", " ").capitalize
+        [version, name]
+      end
+
+      def create_seed_file
+        if !SeedMigration.update_seeds_file || !Rails.env.development?
+          return
+        end
+        File.open(SEEDS_FILE_PATH, "w") do |file|
+          file.write <<~EOS
+            # encoding: UTF-8
+            # This file is auto-generated from the current content of the database. Instead
+            # of editing this file, please use the migrations feature of Seed Migration to
+            # incrementally modify your database, and then regenerate this seed file.
+            #
+            # If you need to create the database on another system, you should be using
+            # db:seed, not running all the migrations from scratch. The latter is a flawed
+            # and unsustainable approach (the more migrations you'll amass, the slower
+            # it'll run and the greater likelihood for issues).
+            #
+            # It's strongly recommended to check this file into your version control system.
+
+            ActiveRecord::Base.transaction do
+          EOS
+          SeedMigration.registrar.each do |register_entry|
+            register_entry.model.order("id").each do |instance|
+              file.write generate_model_creation_string(instance, register_entry)
+            end
+
+            if !SeedMigration.ignore_ids
+              file.write <<-EOS
+    ActiveRecord::Base.connection.reset_pk_sequence!('#{register_entry.model.table_name}')
+              EOS
+            end
+          end
+          file.write <<~EOS
+            end
+
+            SeedMigration::Migrator.bootstrap(#{last_migration})
+          EOS
         end
       end
 
-      return to_rollback
-    end
-
-    def self.get_last_migration_date
-      return nil if SeedMigration::DataMigration.count == 0
-      DateTime.parse(last_migration)
-    end
-
-    def self.get_migration_files(last_timestamp = nil)
-      files = Dir.glob(migration_path("*_*.rb"))
-      if last_timestamp.present?
-        files.delete_if do |file|
-          timestamp = File.basename(file).split('_').first
-          timestamp > last_timestamp
+      def generate_model_creation_string(instance, register_entry)
+        attributes = instance.attributes.select { |key| register_entry.attributes.include?(key) }
+        if SeedMigration.ignore_ids
+          attributes.delete("id")
         end
-      end
-
-      # Just in case
-      files.sort!
-    end
-
-    def self.get_all_migration_versions
-      SeedMigration::DataMigration.all.map(&:version)
-    end
-
-    def self.parse_migration_filename(filename)
-      basename = File.basename(filename, '.rb')
-      _, version, underscored_name = basename.match(/(\d+)_(.*)/).to_a
-      name = underscored_name.gsub("_", " ").capitalize
-      [version, name]
-    end
-
-    def self.create_seed_file
-      if !SeedMigration.update_seeds_file || !Rails.env.development?
-        return
-      end
-      File.open(SEEDS_FILE_PATH, 'w') do |file|
-        file.write <<-eos
-# encoding: UTF-8
-# This file is auto-generated from the current content of the database. Instead
-# of editing this file, please use the migrations feature of Seed Migration to
-# incrementally modify your database, and then regenerate this seed file.
-#
-# If you need to create the database on another system, you should be using
-# db:seed, not running all the migrations from scratch. The latter is a flawed
-# and unsustainable approach (the more migrations you'll amass, the slower
-# it'll run and the greater likelihood for issues).
-#
-# It's strongly recommended to check this file into your version control system.
-
-ActiveRecord::Base.transaction do
-        eos
-        SeedMigration.registrar.each do |register_entry|
-          register_entry.model.order('id').each do |instance|
-            file.write generate_model_creation_string(instance, register_entry)
-          end
-
-          if !SeedMigration.ignore_ids
-            file.write <<-eos
-  ActiveRecord::Base.connection.reset_pk_sequence!('#{register_entry.model.table_name}')
-            eos
-          end
+        sorted_attributes = {}
+        attributes.sort.each do |key, value|
+          sorted_attributes[key] = value
         end
-        file.write <<-eos
-end
 
-SeedMigration::Migrator.bootstrap(#{last_migration})
-        eos
-      end
-    end
+        if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
+          model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
+        else
+          model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
+        end
 
-    def self.generate_model_creation_string(instance, register_entry)
-      attributes = instance.attributes.select {|key| register_entry.attributes.include?(key) }
-      if SeedMigration.ignore_ids
-        attributes.delete('id')
-      end
-      sorted_attributes = {}
-      attributes.sort.each do |key, value|
-        sorted_attributes[key] = value
+        # With pretty indents, please.
+        <<-EOS
+
+    #{model_creation_string}
+        EOS
       end
 
-      if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
-      elsif Rails::VERSION::MAJOR == 4 || Rails::VERSION::MAJOR == 5
-        model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
+      def create_method
+        SeedMigration.use_strict_create? ? "create!" : "create"
       end
-
-      # With pretty indents, please.
-      return <<-eos
-
-  #{model_creation_string}
-      eos
-    end
-
-    def self.create_method
-      SeedMigration.use_strict_create? ? 'create!' : 'create'
     end
 
     class PendingMigrationError < StandardError

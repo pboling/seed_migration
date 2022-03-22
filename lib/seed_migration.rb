@@ -14,13 +14,13 @@ module SeedMigration
     def register(model, &block)
       unregister model
       entry = RegisterEntry.new(model)
-      entry.instance_eval(&block) if block_given?
+      entry.instance_eval(&block) if block
 
-      self.registrar << entry
+      registrar << entry
     end
 
     def unregister(model)
-      self.registrar.delete_if { |entry| entry.model == model }
+      registrar.delete_if { |entry| entry.model == model }
     end
   end
 end
