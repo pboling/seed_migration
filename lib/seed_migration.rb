@@ -20,7 +20,7 @@ module SeedMigration
     end
 
     def unregister(model)
-      registrar.delete_if { |entry| entry.model == model }
+      registrar.delete_if { |entry| entry.model_name == model.to_s }
     end
   end
 end

@@ -1,29 +1,31 @@
 module SeedMigration
   class RegisterEntry
-    attr_reader :model
-    attr_accessor :attributes
+    attr_reader :model, :model_name
 
     def initialize(model)
-      @model = model
-      @attributes = model.attribute_names.dup
+      @model_name = model.to_s
+      @excluded_attributes = []
     end
 
     def exclude(*attrs)
-      attrs.map(&:to_s).each { |attr| exclude_single_attributes attr }
+      attrs.map(&:to_s).each { |attr| @excluded_attributes << attr }
+      @attributes = nil
     end
 
     def eql?(other)
-      other.class == self.class && other.model == model
+      other.class == self.class && other.model_name == model_name
     end
 
     def hash
       model.hash
     end
 
-    private
+    def model
+      @model ||= Object.const_get(@model_name)
+    end
 
-    def exclude_single_attributes(attr)
-      @attributes.delete attr
+    def attributes
+      @attributes ||= model.attribute_names.reject { |attr| @excluded_attributes.include?(attr) }
     end
   end
 end

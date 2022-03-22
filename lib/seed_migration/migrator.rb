@@ -286,10 +286,10 @@ module SeedMigration
           sorted_attributes[key] = value
         end
 
-        if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
-          model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
+        model_creation_string = if Rails::VERSION::MAJOR == 3 || defined?(ActiveModel::MassAssignmentSecurity)
+          "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)}, :without_protection => true)"
         else
-          model_creation_string = "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
+          "#{instance.class}.#{create_method}(#{JSON.parse(sorted_attributes.to_json)})"
         end
 
         # With pretty indents, please.

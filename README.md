@@ -224,12 +224,11 @@ Use an initializer file for configuration.
 SeedMigration.config do |c|
     c.migration_table_name = 'data_migrations'
     c.extend_native_migration_task = true
+    c.register User do
+      exclude :id, :password
+    end
+    c.register Product
 end
-
-SeedMigration.register User do
-  exclude :id, :password
-end
-SeedMigration.register Product
 ```
 
 ## Compatibility
