@@ -210,14 +210,19 @@ end
 ## Disable Transactions
 
 Support has been added for disabling transactions for long running migrations.
+Since a long running migration can lock a table in production, transactions are
+disabled by default. You should always try to write idempotent migrations,
+but if you can't, you can either add transaction blocks manually in your migration,
+or if you just want to enable a transaction around the whole migration, you can
+call `use_transaction!`.
 
 ```ruby
 class ChangeABunchOfJobs < SeedMigration::Migration
 
-  disable_transaction!
+  use_transaction!
 
   def up
-    Job.all.in_batches.update_all(awesome: true)
+    ...
   end
 
   def down

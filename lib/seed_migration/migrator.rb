@@ -90,12 +90,12 @@ module SeedMigration
     end
 
     def transaction(klass)
-      if transaction_disabled?
-        yield
-      else
+      if transaction_enabled
         ActiveRecord::Base.transaction do
           yield
         end
+      else
+        yield
       end
     end
 
