@@ -2,7 +2,7 @@
 
 # SeedMigration
 
-Harry's Data Migrations are a way to manage changes to seed data in a rails app in a similar way to how schema migrations are handled.
+Seed Migrations are a way to manage changes to seed data in a rails app in a similar way to how schema migrations are handled.
 
 
 ## Intro
