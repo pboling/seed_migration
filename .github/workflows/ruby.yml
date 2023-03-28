@@ -1,0 +1,120 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+name: Ruby
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test_mysql:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - ruby: 3.0.3
+          gemfile: gemfiles/Gemfile.rails-6.1-stable
+          mysql-version: 8.0
+        - ruby: 3.1.1
+          gemfile: gemfiles/Gemfile.rails-7.0-stable
+          mysql-version: 8.0
+    env:
+      BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
+      DB: mysql
+      RAILS_ENV: test
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "${{ matrix.ruby }}"
+        bundler-cache: true
+    - name: Setup database
+      uses: ankane/setup-mysql@v1
+      with:
+        mysql-version: ${{ matrix.mysql-version }}
+    - name: Run tests
+      run: |
+        bundle exec rake app:db:setup
+        bundle exec rspec spec/
+  test_pg:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          DB: postgresql
+        options: >-
+            --health-cmd pg_isready
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+        ports:
+          - 5432:5432
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - ruby: 2.7.5
+          gemfile: gemfiles/Gemfile.rails-6.1-stable
+        - ruby: 2.7.5
+          gemfile: gemfiles/Gemfile.rails-7.0-stable
+        - ruby: 3.0.3
+          gemfile: gemfiles/Gemfile.rails-6.1-stable
+        - ruby: 3.1.1
+          gemfile: gemfiles/Gemfile.rails-7.0-stable
+    env:
+      BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
+      DB: postgresql
+      POSTGRES_PASSWORD: postgres
+      RAILS_ENV: test
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "${{ matrix.ruby }}"
+        bundler-cache: true
+    - name: Setup database
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        PGPASSWORD=postgres psql -c 'create database test;' -U postgres -p 5432 -h localhost
+    - name: Run tests
+      run: |
+        bundle exec rake app:db:setup
+        bundle exec rspec spec/
+  test_sqlite:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - ruby: 2.7.5
+          gemfile: gemfiles/Gemfile.rails-6.1-stable
+        - ruby: 3.1.1
+          gemfile: gemfiles/Gemfile.rails-7.0-stable
+    env:
+      BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
+      DB: sqlite
+      RAILS_ENV: test
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "${{ matrix.ruby }}"
+        bundler-cache: true
+    - name: Run tests
+      run: |
+        bundle exec rake app:db:setup
+        bundle exec rspec spec/
