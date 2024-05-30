@@ -27,5 +27,9 @@ module SeedMigration
     def attributes
       @attributes ||= model.attribute_names.reject { |attr| @excluded_attributes.include?(attr) }
     end
+
+    def model_has_attribute?(attr)
+      model.attribute_names.include?(attr.to_s)
+    end
   end
 end

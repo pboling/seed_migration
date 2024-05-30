@@ -255,7 +255,8 @@ module SeedMigration
 ActiveRecord::Base.transaction do
         eos
         SeedMigration.registrar.each do |register_entry|
-          register_entry.model.order('id').each do |instance|
+          model_records = register_entry.model_has_attribute?(:id) ? register_entry.model.order('id') : register_entry.model.all
+          model_records.each do |instance|
             file.write generate_model_creation_string(instance, register_entry)
           end
 
