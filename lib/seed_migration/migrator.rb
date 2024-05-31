@@ -293,37 +293,35 @@ ActiveRecord::Base.transaction do
         puts "HABTM Set: #{habtm_associations_to_add.inspect}"
 
         # Handle HABTM associations
-        SeedMigration.registrar.each do |register_entry|
+        habtm_associations_to_add do |associated_model_syms|
+          model_sym = associated_model_syms.first
+          model = model_sym.to_s.classify.constantize
 
-          # Get all HABTM associations for register_entry model
-          habtm_associations = register_entry.model.reflect_on_all_associations(:has_and_belongs_to_many)
-          next unless habtm_associations.present?
+          associated_model_sym = associated_model_syms.second
+          plural_associated_model_sym = associated_model_sym.to_s.pluralize.to_sym
+          associated_model = associated_model_sym.to_s.classify.constantize
 
-          model_records = register_entry.model_has_attribute?(:id) ? register_entry.model.order('id') : register_entry.model.all
-          model_records.each do |instance|
-            habtm_associations.each do |association|
-              # Get all entries in join table
-              associated_class_sym = association.name
-              associated_class = associated_class_sym.to_s.classify.constantize
+          # For each model instance, add associated model instances in bulk
+          model.order("id").each do |model_instance|
+            associated_model_ids = model_instance.public_send(plural_associated_model_sym).pluck(:id)
 
-              # If the associated model is not registered, don't populate join table
-              next unless model_class_registered?(associated_class)
+            # e.g. Model.find(#{id}).associated_models
+            model_instance_association_string = "#{model}.find(#{model_instance.id}).#{plural_associated_model_sym}"
 
-              # TODO: can add all associated instances in bulk
-              instance.public_send(associated_class_sym).each do |associated_instance|
-                # e.g. Model1.find(#{id}).Model2
-                instance_association_string = "#{register_entry.model}.find(#{instance.id}).#{associated_class_sym}"
-                # e.g. Model2.find(#{id}), to be added to HABTM association
-                associated_instance_string = "#{associated_class}.find(#{associated_instance.id})"
-                # e.g. Model1.find(#{id}).model2s.pluck(:id).include?(#{associated_instance.id})
-                check_for_existing_association_string = "#{instance_association_string}.pluck(:id).include?(#{associated_instance.id})"
+            # e.g. AssociatedModel.where(id: associated_model_ids)
+            associated_model_instances_string = "#{associated_model}.where(id: #{associated_model_ids})"
 
-                file.write <<-eos
+            # instance.public_send(associated_class_sym).each do |associated_instance|
+              # instance_association_string = "#{model}.find(#{instance.id}).#{associated_class_sym}"
+              # e.g. Model2.find(#{id}), to be added to HABTM association
+              # associated_instance_string = "#{associated_class}.find(#{associated_instance.id})"
+              # e.g. Model1.find(#{id}).model2s.pluck(:id).include?(#{associated_instance.id})
+              # check_for_existing_association_string = "#{instance_association_string}.pluck(:id).include?(#{associated_instance.id})"
 
-  #{instance_association_string} << #{associated_instance_string} unless #{check_for_existing_association_string}
-                eos
-              end
-            end
+            file.write <<-eos
+
+  #{model_instance_association_string} << #{associated_model_instances_string}
+            eos
           end
         end
         file.write <<-eos
