@@ -282,12 +282,15 @@ ActiveRecord::Base.transaction do
               next unless model_class_registered?(associated_class)
 
               instance.public_send(associated_class_sym).each do |associated_instance|
-                instance_association_string = "#{register_entry.model}.find(#{instance.id}).#{associated_class_sym}"
+                # e.g. Model1.find(#{id}).Model2
+                instance_association_string = "#{register_entry_model}.find(#{instance.id}).#{associated_class_sym}"
+                # e.g. Model2.find(#{id}), to be added to HABTM association
                 associated_instance_string = "#{associated_class}.find(#{associated_instance.id})"
-                check_for_existing_association_string = "#{instance_string}.pluck(:id).include?(#{associated_instance.id})"
+                # e.g. Model1.find(#{id}).model2s.pluck(:id).include?(#{associated_instance.id})
+                check_for_existing_association_string = "#{instance_association_string}.pluck(:id).include?(#{associated_instance.id})"
 
                 file.write <<-eos
-  "#{instance_string} << #{associated_instance_string} unless #{check_for_existing_association_string}"
+  "#{instance_association_string} << #{associated_instance_string} unless #{check_for_existing_association_string}"
                 eos
               end
             end
