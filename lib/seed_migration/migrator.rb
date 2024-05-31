@@ -293,7 +293,8 @@ ActiveRecord::Base.transaction do
                 check_for_existing_association_string = "#{instance_association_string}.pluck(:id).include?(#{associated_instance.id})"
 
                 file.write <<-eos
-  "#{instance_association_string} << #{associated_instance_string} unless #{check_for_existing_association_string}"
+
+  #{instance_association_string} << #{associated_instance_string} unless #{check_for_existing_association_string}
                 eos
               end
             end
