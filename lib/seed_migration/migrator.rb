@@ -269,6 +269,7 @@ ActiveRecord::Base.transaction do
 
         # Handle HABTM associations
         SeedMigration.registrar.each do |register_entry|
+
           # Get all HABTM associations for register_entry model
           habtm_associations = register_entry.model.reflect_on_all_associations(:has_and_belongs_to_many)
           next unless habtm_associations.present?
@@ -279,11 +280,13 @@ ActiveRecord::Base.transaction do
               # Get all entries in join table
               associated_class_sym = association.name
               associated_class = associated_class_sym.to_s.classify.constantize
+
+              # If the associated model is not registered, don't populate join table
               next unless model_class_registered?(associated_class)
 
               instance.public_send(associated_class_sym).each do |associated_instance|
                 # e.g. Model1.find(#{id}).Model2
-                instance_association_string = "#{register_entry_model}.find(#{instance.id}).#{associated_class_sym}"
+                instance_association_string = "#{register_entry.model}.find(#{instance.id}).#{associated_class_sym}"
                 # e.g. Model2.find(#{id}), to be added to HABTM association
                 associated_instance_string = "#{associated_class}.find(#{associated_instance.id})"
                 # e.g. Model1.find(#{id}).model2s.pluck(:id).include?(#{associated_instance.id})
