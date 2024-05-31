@@ -293,7 +293,7 @@ ActiveRecord::Base.transaction do
         puts "HABTM Set: #{habtm_associations_to_add.inspect}"
 
         # Handle HABTM associations
-        habtm_associations_to_add do |associated_model_syms|
+        habtm_associations_to_add.each do |associated_model_syms|
           model_sym = associated_model_syms.first
           model = model_sym.to_s.classify.constantize
 
