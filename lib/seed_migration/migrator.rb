@@ -252,6 +252,15 @@ module SeedMigration
 #
 # It's strongly recommended to check this file into your version control system.
 
+# Ignore exceptions when appending to an HABTM association
+def safe_habtm_append(model_associations, associated_model_instance_arr)
+  begin
+    model_associations << associated_model_instance_arr
+  rescue ActiveRecord::RecordNotUnique => e
+
+  end
+end
+
 ActiveRecord::Base.transaction do
         eos
         SeedMigration.registrar.each do |register_entry|
@@ -270,7 +279,6 @@ ActiveRecord::Base.transaction do
         file.write <<-eos
 
   # HABTM Associations
-
         eos
         # Create list of unique HABTM associations
         habtm_associations_to_add = Set.new
@@ -289,8 +297,6 @@ ActiveRecord::Base.transaction do
             habtm_associations_to_add.add([registered_model_sym, associated_class_sym].sort)
           end
         end
-
-        puts "HABTM Set: #{habtm_associations_to_add.inspect}"
 
         # Handle HABTM associations
         habtm_associations_to_add.each do |associated_model_syms|
@@ -320,7 +326,7 @@ ActiveRecord::Base.transaction do
 
             file.write <<-eos
 
-  #{model_instance_association_string} << #{associated_model_instances_string}
+  safe_habtm_append(#{model_instance_association_string}, #{associated_model_instances_string})
             eos
           end
         end
