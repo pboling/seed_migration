@@ -279,8 +279,8 @@ ActiveRecord::Base.transaction do
           model_habtm_associations = register_entry.model.reflect_on_all_associations(:has_and_belongs_to_many)
 
           model_habtm_associations.each do |association|
-            associated_class_sym = association.name
-            associated_class = associated_class_sym.to_s.classify.constantize
+            associated_class_sym = association.plural_name.singularize.to_sym
+            associated_class = association.plural_name.classify.constantize
 
             # If the associated model is not registered, don't populate join table
             next unless model_class_registered?(associated_class)
@@ -290,7 +290,7 @@ ActiveRecord::Base.transaction do
           end
         end
 
-        puts habtm_associations_to_add.inspect
+        puts "HABTM Set: #{habtm_associations_to_add.inspect}"
 
         # Handle HABTM associations
         SeedMigration.registrar.each do |register_entry|
