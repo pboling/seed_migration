@@ -266,6 +266,33 @@ ActiveRecord::Base.transaction do
             eos
           end
         end
+
+        # Handle HABTM associations
+        SeedMigration.registrar.each do |register_entry|
+          # Get all HABTM associations for register_entry model
+          habtm_associations = register_entry.model.reflect_on_all_associations(:has_and_belongs_to_many)
+          next unless habtm_associations.present?
+
+          model_records = register_entry.model_has_attribute?(:id) ? register_entry.model.order('id') : register_entry.model.all
+          model_records.each do |instance|
+            habtm_associations.each do |association|
+              # Get all entries in join table
+              associated_class_sym = association.name
+              associated_class = associated_class_sym.to_s.classify.constantize
+              next unless model_class_registered?(associated_class)
+
+              instance.public_send(associated_class_sym).each do |associated_instance|
+                instance_association_string = "#{register_entry.model}.find(#{instance.id}).#{associated_class_sym}"
+                associated_instance_string = "#{associated_class}.find(#{associated_instance.id})"
+                check_for_existing_association_string = "#{instance_string}.pluck(:id).include?(#{associated_instance.id})"
+
+                file.write <<-eos
+  "#{instance_string} << #{associated_instance_string} unless #{check_for_existing_association_string}"
+                eos
+              end
+            end
+          end
+        end
         file.write <<-eos
 end
 
@@ -299,6 +326,10 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
 
     def self.create_method
       SeedMigration.use_strict_create? ? 'create!' : 'create'
+    end
+
+    def self.model_class_registered?(model_class)
+      SeedMigration.registrar.any? { |entry| entry.model_name == model_class.to_s }
     end
 
     class PendingMigrationError < StandardError
