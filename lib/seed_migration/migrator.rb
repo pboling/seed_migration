@@ -272,6 +272,26 @@ ActiveRecord::Base.transaction do
   # HABTM Associations
 
         eos
+        # Create list of unique HABTM associations
+        habtm_associations_to_add = Set.new
+        SeedMigration.registrar.each do |register_entry|
+          registered_model_sym = register_entry.model_name.underscore.to_sym
+          model_habtm_associations = register_entry.model.reflect_on_all_associations(:has_and_belongs_to_many)
+
+          model_habtm_associations.each do |association|
+            associated_class_sym = association.name
+            associated_class = associated_class_sym.to_s.classify.constantize
+
+            # If the associated model is not registered, don't populate join table
+            next unless model_class_registered?(associated_class)
+
+            # Add to HABTM associations set
+            habtm_associations_to_add.add([registered_model_sym, associated_class_sym].sort)
+          end
+        end
+
+        puts habtm_associations_to_add.inspect
+
         # Handle HABTM associations
         SeedMigration.registrar.each do |register_entry|
 
@@ -289,6 +309,7 @@ ActiveRecord::Base.transaction do
               # If the associated model is not registered, don't populate join table
               next unless model_class_registered?(associated_class)
 
+              # TODO: can add all associated instances in bulk
               instance.public_send(associated_class_sym).each do |associated_instance|
                 # e.g. Model1.find(#{id}).Model2
                 instance_association_string = "#{register_entry.model}.find(#{instance.id}).#{associated_class_sym}"
