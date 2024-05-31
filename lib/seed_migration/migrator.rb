@@ -267,6 +267,11 @@ ActiveRecord::Base.transaction do
           end
         end
 
+        file.write <<-eos
+
+  # HABTM Associations
+
+        eos
         # Handle HABTM associations
         SeedMigration.registrar.each do |register_entry|
 
