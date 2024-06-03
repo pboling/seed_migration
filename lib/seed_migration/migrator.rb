@@ -257,7 +257,7 @@ def safe_habtm_append(model_associations, associated_model_instance_arr)
   begin
     model_associations << associated_model_instance_arr
   rescue ActiveRecord::RecordNotUnique => e
-
+    SeedMigration::Migrator.logger.error e
   end
 end
 
