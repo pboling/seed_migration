@@ -309,20 +309,19 @@ ActiveRecord::Base.transaction do
 
           # For each model instance, add associated model instances in bulk
           model.order("id").each do |model_instance|
-            associated_model_ids = model_instance.public_send(plural_associated_model_sym).pluck(:id)
+            # This is the list of associated model ids that we want to add to the HABTM
+            all_associated_model_ids = model_instance.public_send(plural_associated_model_sym).pluck(:id)
+
+            # This get the list of associated model ids that already exist in the join table
+            existing_associated_model_ids = associated_model.where(id: all_associated_model_ids).pluck(:id)
 
             # e.g. Model.find(#{id}).associated_models
             model_instance_association_string = "#{model}.find(#{model_instance.id}).#{plural_associated_model_sym}"
 
-            # e.g. AssociatedModel.where(id: associated_model_ids)
-            associated_model_instances_string = "#{associated_model}.where(id: #{associated_model_ids})"
-
-            # instance.public_send(associated_class_sym).each do |associated_instance|
-              # instance_association_string = "#{model}.find(#{instance.id}).#{associated_class_sym}"
-              # e.g. Model2.find(#{id}), to be added to HABTM association
-              # associated_instance_string = "#{associated_class}.find(#{associated_instance.id})"
-              # e.g. Model1.find(#{id}).model2s.pluck(:id).include?(#{associated_instance.id})
-              # check_for_existing_association_string = "#{instance_association_string}.pluck(:id).include?(#{associated_instance.id})"
+            # Generate code to remove existing associated model ids to avoid adding duplicate entries
+            associated_model_ids_to_add = "#{all_associated_model_ids} - #{model_instance_association_string}.pluck(:id)"
+            # e.g. AssociatedModel.where(id: #{associated_model_ids_to_add})
+            associated_model_instances_string = "#{associated_model}.where(id: #{associated_model_ids_to_add})"
 
             file.write <<-eos
 
