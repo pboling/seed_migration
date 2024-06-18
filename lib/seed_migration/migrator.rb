@@ -252,16 +252,80 @@ module SeedMigration
 #
 # It's strongly recommended to check this file into your version control system.
 
+# Ignore exceptions when appending to an HABTM association
+def safe_habtm_append(model_associations, associated_model_instance_arr)
+  begin
+    model_associations << associated_model_instance_arr
+  rescue ActiveRecord::RecordNotUnique => e
+    SeedMigration::Migrator.logger.error e
+  end
+end
+
 ActiveRecord::Base.transaction do
         eos
         SeedMigration.registrar.each do |register_entry|
-          register_entry.model.order('id').each do |instance|
+          model_records = register_entry.model_has_attribute?(:id) ? register_entry.model.order('id') : register_entry.model.all
+          model_records.each do |instance|
             file.write generate_model_creation_string(instance, register_entry)
           end
 
           if !SeedMigration.ignore_ids
             file.write <<-eos
   ActiveRecord::Base.connection.reset_pk_sequence!('#{register_entry.model.table_name}')
+            eos
+          end
+        end
+
+        file.write <<-eos
+
+  # HABTM Associations
+        eos
+        # Create list of unique HABTM associations
+        habtm_associations_to_add = Set.new
+        SeedMigration.registrar.each do |register_entry|
+          registered_model_sym = register_entry.model_name.underscore.to_sym
+          model_habtm_associations = register_entry.model.reflect_on_all_associations(:has_and_belongs_to_many)
+
+          model_habtm_associations.each do |association|
+            associated_class_sym = association.plural_name.singularize.to_sym
+            associated_class = association.plural_name.classify.constantize
+
+            # If the associated model is not registered, don't populate join table
+            next unless model_class_registered?(associated_class)
+
+            # Add to HABTM associations set
+            habtm_associations_to_add.add([registered_model_sym, associated_class_sym].sort)
+          end
+        end
+
+        # Handle HABTM associations
+        habtm_associations_to_add.each do |associated_model_syms|
+          model_sym = associated_model_syms.first
+          model = model_sym.to_s.classify.constantize
+
+          associated_model_sym = associated_model_syms.second
+          plural_associated_model_sym = associated_model_sym.to_s.pluralize.to_sym
+          associated_model = associated_model_sym.to_s.classify.constantize
+
+          # For each model instance, add associated model instances in bulk
+          model.order("id").each do |model_instance|
+            # This is the list of associated model ids that we want to add to the HABTM
+            all_associated_model_ids = model_instance.public_send(plural_associated_model_sym).pluck(:id)
+
+            # This get the list of associated model ids that already exist in the join table
+            existing_associated_model_ids = associated_model.where(id: all_associated_model_ids).pluck(:id)
+
+            # e.g. Model.find(#{id}).associated_models
+            model_instance_association_string = "#{model}.find(#{model_instance.id}).#{plural_associated_model_sym}"
+
+            # Generate code to remove existing associated model ids to avoid adding duplicate entries
+            associated_model_ids_to_add = "#{all_associated_model_ids} - #{model_instance_association_string}.pluck(:id)"
+            # e.g. AssociatedModel.where(id: #{associated_model_ids_to_add})
+            associated_model_instances_string = "#{associated_model}.where(id: #{associated_model_ids_to_add})"
+
+            file.write <<-eos
+
+  safe_habtm_append(#{model_instance_association_string}, #{associated_model_instances_string})
             eos
           end
         end
@@ -298,6 +362,10 @@ SeedMigration::Migrator.bootstrap(#{last_migration})
 
     def self.create_method
       SeedMigration.use_strict_create? ? 'create!' : 'create'
+    end
+
+    def self.model_class_registered?(model_class)
+      SeedMigration.registrar.any? { |entry| entry.model_name == model_class.to_s }
     end
 
     class PendingMigrationError < StandardError
